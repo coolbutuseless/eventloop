@@ -1,0 +1,82 @@
+---
+title: "Starfield"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Starfield}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, eval = FALSE}
+library(eventloop)
+library(grid)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Global variables for starfield:
+#   The x,y positions of each point in 'npc' coordinates - in range [0, 1]
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+xs <- runif(1000)
+ys <- runif(1000)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Draw a rotating/expanding starfield
+#
+#  Standard variables defined as part of rendering framework
+#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
+#  - X, Y         mouse coordinates in pixels
+#  - width,height dimensions of window in pixels
+#  - fps          frames per second in last 100 frames
+#  - frame        current frame number (integer sequence starting from 1)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+starfield <- function() {
+
+  # Set the centre for expansion/rotation to be the current mouse (x,y)
+  # could just set to centre to (0.5, 0.5) for non-interactive case
+  xcentre <- x
+  ycentre <- y
+
+  # Expand points around centre
+  xt <- (xs - xcentre) * 1.03
+  yt <- (ys - ycentre) * 1.03
+
+  # Rotate points around centre
+  theta <- 1.5 * pi/180
+  xs <<- xt * cos(theta) - yt * sin(theta) + xcentre
+  ys <<- xt * sin(theta) + yt * cos(theta) + ycentre
+
+  # Replace any out-of-bound points with new random points
+  out_of_bounds <- which(xs < 0 | xs > 1 | ys < 0 | ys > 1)
+  N <- length(out_of_bounds)
+  if (N > 0) {
+    xs[out_of_bounds] <<- runif(N, xcentre - 0.05, xcentre + 0.05)
+    ys[out_of_bounds] <<- runif(N, ycentre - 0.05, ycentre + 0.05)
+  }
+
+  # Clear screen, plot points, add in FPS info in bottom corner
+  grid::grid.rect(gp = grid::gpar(fill = 'white'))
+  grid::grid.points(
+    x = grid::unit(xs, 'npc'),
+    y = grid::unit(ys, 'npc'),
+    pch = '+'
+  )
+  grid::grid.text(
+    label = paste("FPS:", round(fps)), x = 0.01, y = 0.01,
+    just = c('left', 'bottom'), gp = grid::gpar(fontfamily = 'mono', cex = 2)
+  )
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start an interactive render loop around this function
+# Note: Your OS must support this device:  x11(type = 'dbcairo')
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+run_loop(starfield, target_fps = 60)
+```

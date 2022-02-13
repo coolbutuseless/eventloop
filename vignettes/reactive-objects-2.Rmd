@@ -1,0 +1,89 @@
+---
+title: "Reactive Objects 2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reactive Objects 2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, eval=FALSE}
+library(eventloop)
+library(grid)
+library(viridisLite)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Data.frame of point (x,y) r, fill information
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+library(grid)
+
+N <- 33
+r <- 1/N/2
+decay    <- 0.0014
+min_size <- 0.1
+points <- expand.grid(
+  x = seq(N)/N - r,
+  y = seq(N)/N - r,
+  r = r,
+  scale = min_size
+)
+
+# points$fill <- sample(viridisLite::cividis(20), nrow(points), replace = TRUE)
+points$fill <- viridisLite::magma(nrow(points))
+
+scale <- rep(min_size, nrow(points))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define the operations to be performed each loop
+#
+#  Standard variables defined as part of rendering framework
+#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
+#  - X, Y         mouse coordinates in pixels
+#  - width,height dimensions of window in pixels
+#  - fps          frames per second in last 100 frames
+#  - frame        current frame number (integer sequence starting from 1)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+flipper <- function() {
+
+  # Highlight points near mouse
+  near <- (abs(points$x - x)+ abs(points$y - y)) < (1.4 * r)
+  scale[near] <<- 1
+
+  # Draw all the points
+  grid::grid.rect(gp = grid::gpar(fill = 'white'))
+  grid::grid.rect(
+    x = points$x,
+    y = points$y,
+    width  = 2 * points$r * scale,
+    height = 2 * points$r * scale,
+    gp = grid::gpar(fill = points$fill, col = NA)
+  )
+
+  # Add 'FPS' count to window
+  grid::grid.rect(x = 0, y = 0, width = 0.5, height = 0.1,
+                  gp = grid::gpar(fill = 'white'))
+  grid::grid.text(
+    label = paste("FPS:", round(fps)), x = 0.01, y = 0.01,
+    just = c('left', 'bottom'), gp = grid::gpar(fontfamily = 'mono', cex = 2)
+  )
+
+  # decay the size of each point
+  scale <<- pmax(scale - decay, min_size)
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run the loop
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+run_loop(flipper, 10, 10)
+
+```

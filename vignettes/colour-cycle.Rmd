@@ -1,0 +1,49 @@
+---
+title: "Colour Cycle"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Colour Cycle}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, eval = FALSE}
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+colours <- rainbow(100)
+latch   <- FALSE
+
+colour_cycle <- function() {
+  if (!is.null(event)) {
+    if (event$type == 'click') {
+      latch <<- TRUE
+      msg <- sprintf("(%.1f, %.1f) (%.1f, %.1f), (%f, %f) %.1f", x, y, X, Y, width, height, fps)
+      cat(msg, "\n")
+    } else if (event$type == 'release') {
+      latch <<- FALSE
+    }
+  }
+
+  if (latch) {
+    col <- colours[[(frame %% 100) + 1L]]
+  } else {
+    col <- 'white'
+  }
+
+  grid::grid.rect(gp = grid::gpar(fill = col))
+  grid::grid.text(label = paste("FPS: ", round(fps)), x = 0.01, y = 0.01, just = c('left', 'bottom'),
+                  gp = grid::gpar(fontfamily = 'mono', cex = 2))
+}
+
+
+run_loop(colour_cycle, 7, 7)
+```

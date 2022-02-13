@@ -1,0 +1,97 @@
+---
+title: "Game of Life"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Game of Life}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, eval = FALSE}
+library(eventloop)
+library(grid)
+
+# Board
+N <- 100
+g <- matrix(sample(c(0L, 1L), N*N, replace = TRUE), N, N)
+
+# standard blank vectors I'll need
+blankN   <- rep(0L, N   )
+blankNm1 <- rep(0L, N-1L)
+
+
+latch <- FALSE
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define the operations to be performed each loop
+#
+#  Standard variables defined as part of rendering framework
+#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
+#  - X, Y         mouse coordinates in pixels
+#  - width,height dimensions of window in pixels
+#  - fps          frames per second in last 100 frames
+#  - frame        current frame number (integer sequence starting from 1)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+game_of_life <- function() {
+
+  if (!is.null(event)) {
+    if (event$type == 'click') {
+      latch <<- TRUE
+    } else if (event$type == 'release') {
+      latch <<- FALSE
+    }
+  }
+
+  if (latch) {
+    g[as.integer((1 - y) * (N-1) + 1), as.integer(x * (N-1) + 1)] <<- 1L
+  } else {
+    
+    # Neighbours, everybody needs good neighbours....
+    #  1 2 3
+    #  4   5
+    #  6 7 8
+    gsum <- cbind(blankN, rbind(blankNm1, g[-N, -N])) +  # 1
+      rbind(blankN, g[-N,]) +                            # 2
+      cbind(rbind(blankNm1, g[-N, -1]), blankN) +        # 3
+      cbind(blankN, g[,-N]) +                            # 4
+      cbind(g[,-1], blankN) +                            # 5
+      cbind(blankN, rbind(g[-1, -N], blankNm1)) +        # 6
+      rbind(g[-1, ], blankN) +                           # 7
+      cbind(rbind(g[-1, -1], blankNm1), blankN)          # 8
+    
+    # Standard Conway rules
+    g[] <<- (g == 1 & (gsum == 2L | gsum == 3)) | (g == 0 & gsum == 3)
+    
+  }
+  
+  
+  # Clear the screen
+  grid::grid.rect(gp = grid::gpar(fill = 'black'))
+
+  # Draw the GameOfLife grid
+  grid.raster(1L - g, interpolate = FALSE)
+
+  # Add 'FPS' count to window
+  grid::grid.rect(x = 0, y = 0, width = 0.5, height = 0.1,
+                  gp = grid::gpar(fill = 'black'))
+  grid::grid.text(
+    label = paste("FPS:", round(fps)), x = 0.01, y = 0.01,
+    just = c('left', 'bottom'), gp = grid::gpar(fontfamily = 'mono', cex = 2, col = 'white')
+  )
+
+  sleep(0.015)
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run the loop
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+run_loop(game_of_life, 7, 7)
+```
