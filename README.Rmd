@@ -1,0 +1,51 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+
+library({package})
+```
+
+# {package}
+
+<!-- badges: start -->
+![](https://img.shields.io/badge/cool-useless-green.svg)
+<!-- badges: end -->
+
+The goal of {package} is to ...
+
+## Installation
+
+You can install from [GitHub](https://github.com/coolbutuseless/{package}) with:
+
+``` r
+# install.package('remotes')
+remotes::install_github('coolbutuseless/{package}')
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library({package})
+```
+
+
+## Related Software
+
+
+## Acknowledgements
+
+* R Core for developing and maintaining the language.
+* CRAN maintainers, for patiently shepherding packages onto CRAN and maintaining
+  the repository
