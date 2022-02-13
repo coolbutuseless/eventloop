@@ -1,31 +1,19 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-
-library(eventloop)
-```
 
 # eventloop
 
 <!-- badges: start -->
+
 ![](https://img.shields.io/badge/cool-useless-green.svg)
 <!-- badges: end -->
 
-The goal of eventloop is to ...
+The goal of eventloop is to …
 
 ## Installation
 
-You can install from [GitHub](https://github.com/coolbutuseless/eventloop) with:
+You can install from
+[GitHub](https://github.com/coolbutuseless/eventloop) with:
 
 ``` r
 # install.package('remotes')
@@ -36,7 +24,7 @@ remotes::install_github('coolbutuseless/eventloop')
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example, eval=FALSE}
+``` r
 library(eventloop)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,15 +56,12 @@ colour_cycle <- function() {
 
 
 run_loop(colour_cycle, 7, 7)
-
 ```
-
 
 ## Related Software
 
-
 ## Acknowledgements
 
-* R Core for developing and maintaining the language.
-* CRAN maintainers, for patiently shepherding packages onto CRAN and maintaining
-  the repository
+-   R Core for developing and maintaining the language.
+-   CRAN maintainers, for patiently shepherding packages onto CRAN and
+    maintaining the repository
