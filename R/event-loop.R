@@ -5,15 +5,15 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 onMouseDown <- function(button, x, y) {
 
-  event_env <- getGraphicsEventEnv()
+  event_env <- grDevices::getGraphicsEventEnv()
 
   event_env$event <- list(
     type   = 'click',
     button = button,
     x      = x,
     y      = y,
-    X      = grconvertX(x, 'ndc', 'device'),
-    Y      = grconvertY(y, 'ndc', 'device')
+    X      = graphics::grconvertX(x, 'ndc', 'device'),
+    Y      = graphics::grconvertY(y, 'ndc', 'device')
   )
 
   NULL
@@ -32,8 +32,8 @@ onMouseUp <- function(button, x, y) {
     button = button,
     x      = x,
     y      = y,
-    X      = grconvertX(x, 'ndc', 'device'),
-    Y      = grconvertY(y, 'ndc', 'device')
+    X      = graphics::grconvertX(x, 'ndc', 'device'),
+    Y      = graphics::grconvertY(y, 'ndc', 'device')
   )
 
   NULL
@@ -45,7 +45,7 @@ onMouseUp <- function(button, x, y) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 onMouseMove <- function(button, x, y) {
 
-  event_env <- getGraphicsEventEnv()
+  event_env <- grDevices::getGraphicsEventEnv()
 
   if (is.null(event_env$event)) {
     event_env$event <- list(
@@ -53,8 +53,8 @@ onMouseMove <- function(button, x, y) {
       button = button,
       x      = x,
       y      = y,
-      X      = grconvertX(x, 'ndc', 'device'),
-      Y      = grconvertY(y, 'ndc', 'device')
+      X      = graphics::grconvertX(x, 'ndc', 'device'),
+      Y      = graphics::grconvertY(y, 'ndc', 'device')
     )
   }
 
@@ -67,7 +67,7 @@ onMouseMove <- function(button, x, y) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 onKeybd <- function(char) {
 
-  event_env <- getGraphicsEventEnv()
+  event_env <- grDevices::getGraphicsEventEnv()
 
   event_env$event <- list(
     type = 'key',
@@ -116,7 +116,7 @@ gen_onIdle <- function(user_func, target_fps = 20) {
   first_frame <- TRUE
 
   function() {
-    event_env      <- getGraphicsEventEnv()
+    event_env      <- grDevices::getGraphicsEventEnv()
     event          <- event_env$event
     func_env$event <- event
     func_env$frame <- func_env$frame + 1L
@@ -129,15 +129,15 @@ gen_onIdle <- function(user_func, target_fps = 20) {
     }
 
     if (first_frame) {
-      func_env$width  <- grconvertX(1, 'ndc', 'device')
-      func_env$height <- grconvertY(0, 'ndc', 'device')
+      func_env$width  <- graphics::grconvertX(1, 'ndc', 'device')
+      func_env$height <- graphics::grconvertY(0, 'ndc', 'device')
       func_env$starttime <- Sys.time()
       first_frame <<- FALSE
     }
 
-    dev.hold()
+    grDevices::dev.hold()
     user_func()
-    dev.flush()
+    grDevices::dev.flush()
 
 
     # if (!is.null(target_fps)) {
@@ -184,15 +184,33 @@ gen_onIdle <- function(user_func, target_fps = 20) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Run the user supplied function as the idle function within the event loop
+#'
+#' @param user_func user function
+#' @param width,height size of graphics device to open. Default: 7x7 inches
+#' @param target_fps target frames-per-second.  If rendering speed surpasses
+#'        this then slight pauses will be added to each loop to bring this
+#'        back to the target rate
+#'
+#' @return NULL.  The user function is run over-and-over within the event
+#'         loop.
+#'
+#' @import grDevices
+#' @import graphics
+#'
+#' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 run_loop <- function(user_func, width = 7, height = 7, target_fps = 30) {
-  x11(type = 'dbcairo', width = width, height = height)
-  on.exit(dev.off())
-  dev.control(displaylist = 'inhibit')
+
+  # ToDo capture which device was opened and close this one only
+  grDevices::x11(type = 'dbcairo', width = width, height = height)
+  on.exit(grDevices::dev.off())
+
+  grDevices::dev.control(displaylist = 'inhibit')
 
   onIdle <- gen_onIdle(user_func, target_fps = target_fps)
 
-  setGraphicsEventHandlers(
+  grDevices::setGraphicsEventHandlers(
     prompt        = '',
     onMouseDown   = onMouseDown,
     onMouseUp     = onMouseUp,
@@ -201,12 +219,13 @@ run_loop <- function(user_func, width = 7, height = 7, target_fps = 30) {
     onKeybd       = onKeybd
   )
 
-  event_env <- getGraphicsEventEnv()
+  event_env <- grDevices::getGraphicsEventEnv()
   event_env$event <- NULL
 
   cat('Starting Game Loop ... ')
-  getGraphicsEvent()
+  grDevices::getGraphicsEvent()
 
+  invisible(NULL)
 }
 
 
