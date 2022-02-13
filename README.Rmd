@@ -12,24 +12,24 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 
-library({package})
+library(eventloop)
 ```
 
-# {package}
+# eventloop
 
 <!-- badges: start -->
 ![](https://img.shields.io/badge/cool-useless-green.svg)
 <!-- badges: end -->
 
-The goal of {package} is to ...
+The goal of eventloop is to ...
 
 ## Installation
 
-You can install from [GitHub](https://github.com/coolbutuseless/{package}) with:
+You can install from [GitHub](https://github.com/coolbutuseless/eventloop) with:
 
 ``` r
 # install.package('remotes')
-remotes::install_github('coolbutuseless/{package}')
+remotes::install_github('coolbutuseless/eventloop')
 ```
 
 ## Example
@@ -37,7 +37,7 @@ remotes::install_github('coolbutuseless/{package}')
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
-library({package})
+library(eventloop)
 ```
 
 

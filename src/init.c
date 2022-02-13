@@ -3,16 +3,16 @@
 #include <R.h>
 #include <Rinternals.h>
 
-extern SEXP hello_();
+extern SEXP sleep_();
 
 static const R_CallMethodDef CEntries[] = {
 
-  {"hello_", (DL_FUNC) &hello_, 0},
+  {"sleep_", (DL_FUNC) &sleep_, 1},
   {NULL , NULL, 0}
 };
 
 
-void R_init_{package}(DllInfo *info) {
+void R_init_eventloop(DllInfo *info) {
   R_registerRoutines(
     info,      // DllInfo
     NULL,      // .C

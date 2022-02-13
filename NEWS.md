@@ -1,3 +1,3 @@
-# {package} 0.1.0
+# eventloop 0.1.0
 
 * Initial release

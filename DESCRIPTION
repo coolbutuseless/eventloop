@@ -1,11 +1,12 @@
-Package: {package}
+Package: eventloop
 Type: Package
-Title: {title}
+Title: Event Loop for MacOS
 Version: 0.1.0
 Author: mikefc
 Maintainer: mikefc <mikefc@coolbutuseless.com>
-Description: {description}.
+Description: An event loop for macOS running in XQuartz with keyboard and mouse
+    events.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.2

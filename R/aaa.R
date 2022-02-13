@@ -1,3 +1,3 @@
-#' @useDynLib {package}, .registration=TRUE
+#' @useDynLib eventloop, .registration=TRUE
 NULL
 
