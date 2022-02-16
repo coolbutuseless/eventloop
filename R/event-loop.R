@@ -202,9 +202,11 @@ gen_onIdle <- function(user_func, target_fps = 20) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 run_loop <- function(user_func, width = 7, height = 7, target_fps = 30) {
 
-  # ToDo capture which device was opened and close this one only
+  devs1 <- dev.list()
   grDevices::x11(type = 'dbcairo', width = width, height = height)
-  on.exit(grDevices::dev.off())
+  devs2 <- dev.list()
+  this_dev <- setdiff(devs2, devs1)
+  on.exit(grDevices::dev.off(which = this_dev))
 
   grDevices::dev.control(displaylist = 'inhibit')
 
