@@ -42,7 +42,11 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_deg <- 30
+angle_deg <- 230
+
+
+# speed_start <- Sys.time()
+# for (angle_deg in 1:30) {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,21 +57,18 @@ d <- 5
 x1 <- x0 + d * cos(theta)
 y1 <- y0 + d * sin(theta)
 
-
+quadrant <- as.integer(angle_deg / 90) + 1L
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 yfrac <- 1 - (y0 - floor(y0))
 
 dx <- 1/tan(theta)
-if (theta > 0 && theta < pi) {
+if (quadrant %in% 1:2) {
   dy <- 1
 } else {
   dy <- -1
   yfrac <- (y0 - floor(y0))
-}
-
-if (theta > pi) {
   dx <- -dx
 }
 
@@ -76,8 +77,11 @@ hor <- data.frame(
   y = y0 + yfrac * dy + seq.int(0, 4) * dy
 )
 
-hor %<>%
-  filter(x > 0, x < N, y > 0, y < N)
+idx <- with(hor, x > 0 & x < N & y > 0 & y < N)
+hor <- hor[idx,]
+
+# hor %<>%
+  # filter(x > 0, x < N, y > 0, y < N)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,14 +89,11 @@ hor %<>%
 xfrac <- 1 - (x0 - floor(x0))
 
 dy <-   tan(theta)
-if (theta > 3*pi/2 || theta < pi/2) {
+if (quadrant %in% c(1, 4)) {
   dx <- 1
 } else {
   dx <- -1
   xfrac <- x0 - floor(x0)
-}
-
-if (theta > pi/2 && theta < 3*pi/2) {
   dy <- -dy
 }
 
@@ -102,25 +103,28 @@ ver <- data.frame(
 )
 
 
-ver %<>%
-  filter(x > 0, x < N, y > 0, y < N)
+idx <- with(ver, x > 0 & x < N & y > 0 & y < N)
+ver <- ver[idx,]
+
+# ver %<>%
+#   filter(x > 0, x < N, y > 0, y < N)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Quadrant 1
-if (theta >= 0 && theta <= pi/2) {
+if (quadrant == 1L) {
   hhits <- mat[cbind(hor$y + 1, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x + 1)]
-} else if (theta > pi/2 && theta <= pi) {
+} else if (quadrant == 2L) {
   # Quadrant 2
   hhits <- mat[cbind(hor$y + 1, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x)]
-} else if (theta > pi && theta <= 3*pi/2) {
+} else if (quadrant == 3L) {
   # Quadrant 3
   hhits <- mat[cbind(hor$y, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x)]
-} else if (theta > 3*pi/2 && theta <= 2*pi) {
+} else if (quadrant == 4L) {
   # Quadrant 4
   hhits <- mat[cbind(hor$y, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x + 1)]
@@ -147,6 +151,9 @@ if (max(hhits) == 0) {
 
 xh <- x0 + dist * cos(theta)
 yh <- y0 + dist * sin(theta)
+
+# }  # End speed run
+# print(Sys.time() - speed_start)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the DDA view
