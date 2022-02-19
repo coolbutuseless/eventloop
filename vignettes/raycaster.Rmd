@@ -42,12 +42,17 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_deg <- c(130)
+# angle_degs <- c(230)
+angle_degs <- c(15:45)
+  angle_deg <- angle_degs[1]
 
 
-# speed_start <- Sys.time()
-# for (angle_deg in 1:30) {
-
+speed_start <- Sys.time()
+dists <- numeric(length(angle_degs))
+for (ii in seq_along(angle_degs)) {
+  print(ii)
+  angle_deg <- angle_degs[ii]
+  
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 4.7
@@ -61,13 +66,10 @@ quadrant <- as.integer(angle_deg / 90) + 1L
 yfrac <- 1 - (y0 - floor(y0))
 
 dx <- 1/tan(theta)
-if (quadrant %in% 1:2) {
-  dy <- 1
-} else {
-  dy <- -1
-  yfrac <- (y0 - floor(y0))
-  dx <- -dx
-}
+
+dy    <- ifelse(quadrant %in% 1:2,     1,        -1)
+yfrac <- ifelse(quadrant %in% 1:2, yfrac, 1 - yfrac)
+dx    <- ifelse(quadrant %in% 1:2,    dx,       -dx)
 
 horx = x0 + yfrac * dx + seq.int(0, 4) * dx
 hory = y0 + yfrac * dy + seq.int(0, 4) * dy
@@ -82,13 +84,11 @@ hory <- hory[idx]
 xfrac <- 1 - (x0 - floor(x0))
 
 dy <-   tan(theta)
-if (quadrant %in% c(1L, 4L)) {
-  dx <- 1
-} else {
-  dx <- -1
-  xfrac <- x0 - floor(x0)
-  dy <- -dy
-}
+
+dx    <- ifelse(quadrant %in% c(1L, 4L),     1,        -1)
+xfrac <- ifelse(quadrant %in% c(1L, 4L), xfrac, 1 - xfrac)
+dy    <- ifelse(quadrant %in% c(1L, 4L),    dy,       -dy)
+
 
 verx = x0 + xfrac * dx + seq.int(0, 4) * dx
 very = y0 + xfrac * dy + seq.int(0, 4) * dy
@@ -143,15 +143,21 @@ if (max(hhits) == 0) {
 xh <- x0 + dist * cos(theta)
 yh <- y0 + dist * sin(theta)
 
-# }  # End speed run
-# print(Sys.time() - speed_start)
+  dists[ii] <- dist
+
+}  # End speed run
+print(Sys.time() - speed_start)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the DDA view
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dunit <- 'in'
+dunit <- 'cm'
 
 grid.rect(gp = gpar(fill='white'))
+
+grid.rect(x = (1:30/30), width = 1/30, height = dists/6, gp = gpar(col=NA, fill='blue'))
+
+
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
           gp = gpar(fill = df$col, col = 'grey50'))
 # grid.text(df$val,df$x, df$y, default.units = dunit, gp = gpar(col = 'grey40'))
