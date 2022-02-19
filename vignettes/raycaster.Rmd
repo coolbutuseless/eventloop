@@ -42,11 +42,13 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
+angle_deg <- 30
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 4.7
 y0 <- 3.4
-theta <- 210 * pi/180
+theta <- angle_deg * pi/180
 d <- 5
 x1 <- x0 + d * cos(theta)
 y1 <- y0 + d * sin(theta)
@@ -107,18 +109,18 @@ ver %<>%
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Quadrant 1
-if (theta > 0 && theta < pi/2) {
+if (theta >= 0 && theta <= pi/2) {
   hhits <- mat[cbind(hor$y + 1, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x + 1)]
-} else if (theta > pi/2 && theta < pi) {
+} else if (theta > pi/2 && theta <= pi) {
   # Quadrant 2
   hhits <- mat[cbind(hor$y + 1, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x)]
-} else if (theta > pi && theta < 3*pi/2) {
+} else if (theta > pi && theta <= 3*pi/2) {
   # Quadrant 3
   hhits <- mat[cbind(hor$y, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x)]
-} else if (theta > 3*pi/2 && theta < 2*pi) {
+} else if (theta > 3*pi/2 && theta <= 2*pi) {
   # Quadrant 4
   hhits <- mat[cbind(hor$y, ceiling(hor$x))]
   vhits <- mat[cbind(ceiling(ver$y), ver$x + 1)]
@@ -132,12 +134,16 @@ vfirst <- which.max(vhits)
 hbest <- hor[hfirst,]
 vbest <- ver[vfirst,]
 
-
-hdist <- sqrt((hbest$x - x0)^2 + (hbest$y - y0)^2)
-vdist <- sqrt((vbest$x - x0)^2 + (vbest$y - y0)^2)
-
-dist <- min(hdist, vdist)
-
+if (max(hhits) == 0) {
+  dist <- sqrt((vbest$x - x0)^2 + (vbest$y - y0)^2)
+} else if (max(vhits) == 0) {
+  dist <- sqrt((hbest$x - x0)^2 + (hbest$y - y0)^2)
+} else {
+  hdist <- sqrt((hbest$x - x0)^2 + (hbest$y - y0)^2)
+  vdist <- sqrt((vbest$x - x0)^2 + (vbest$y - y0)^2)
+  
+  dist <- min(hdist, vdist)
+}
 
 xh <- x0 + dist * cos(theta)
 yh <- y0 + dist * sin(theta)
@@ -145,14 +151,15 @@ yh <- y0 + dist * sin(theta)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the DDA view
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dunit <- 'cm'
-start <- Sys.time()
+dunit <- 'in'
+
 grid.rect(gp = gpar(fill='white'))
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
-          gp = gpar(fill = df$col))
-grid.text(df$val,df$x, df$y, default.units = dunit, gp = gpar(col = 'grey80'))
+          gp = gpar(fill = df$col, col = 'grey50'))
+# grid.text(df$val,df$x, df$y, default.units = dunit, gp = gpar(col = 'grey40'))
 grid.points(x0, y0, default.units = dunit)
-grid.lines(c(x0, x1), c(y0, y1), default.units = dunit)
+grid.lines(c(x0, x1), c(y0, y1), default.units = dunit,
+           gp = gpar(lty = 2))
 
 if (nrow(hor) > 0) {
 grid.points(hor$x, hor$y, default.units = dunit,
@@ -168,7 +175,6 @@ grid.lines(c(x0, xh), c(y0, yh), default.units = dunit,
            gp = gpar(col = 'darkgreen', lwd = 4))
 
 
-Sys.time() - start
 ```
 
 
