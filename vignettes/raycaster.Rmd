@@ -1,0 +1,64 @@
+---
+title: "raycaster"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{raycaster}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(eventloop)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+
+
+N <- 5
+mat <- matrix(seq(N*N), N, N)
+
+
+df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
+df$val <- as.vector(mat)
+
+
+x0 <- 1
+y0 <- 1
+theta <- 30 * pi/180
+d <- 5
+x1 <- x0 + d * cos(theta)
+y1 <- y0 + d * sin(theta)
+
+dy <-   tan(theta)
+dx <- 1/tan(theta)
+
+horizontal_df <- data.frame(
+  x = x0 + seq(5) * dx,
+  y = y0 + seq(5)
+)
+
+
+vertical_df <- data.frame(
+  x = x0 + seq(5),
+  y = y0 + seq(5) * dy
+)
+
+ggplot(df) +
+  geom_tile(aes(x = x, y = y), fill=NA, colour='black') + 
+  coord_equal() + 
+  theme_void() +
+  annotate('point', x=x0,y=y0) + 
+  annotate('line', x=c(x0, x1), y=c(y0, y1), alpha = 0.3) + 
+  geom_point(data = horizontal_df, aes(x, y), colour = 'blue') + 
+  geom_point(data =   vertical_df, aes(x, y), colour = 'red')
+
+
+
+```
