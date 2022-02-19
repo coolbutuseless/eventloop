@@ -22,21 +22,22 @@ library(purrr)
 library(grid)
 
 N <- 9
-mat <- matrix(seq(N*N), N, N)
-
+set.seed(1)
+mat <- matrix(sample(c(0, 1), N*N, replace = TRUE, prob = c(0.85, 0.3)), N, N)
+mat[1,] <- 1
+mat[N,] <- 1
+mat[,1] <- 1
+mat[,N] <- 1
 
 df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
-df$col <- 'white'
-df <- df %>% mutate(
-  col = if_else(x < 1 | y < 1 | x > N-1 | y > N-1, 'grey80', col)
-)
+df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 4.7
-y0 <- 4.4
-theta <- 330 * pi/180
+y0 <- 3
+theta <- 30 * pi/180
 d <- 5
 x1 <- x0 + d * cos(theta)
 y1 <- y0 + d * sin(theta)
