@@ -21,31 +21,38 @@ library(dplyr)
 library(purrr)
 library(grid)
 
-N <- 5
+N <- 9
 mat <- matrix(seq(N*N), N, N)
 
 
 df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
-
+df$col <- 'white'
+df <- df %>% mutate(
+  col = if_else(x < 1 | y < 1 | x > N-1 | y > N-1, 'grey80', col)
+)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-x0 <- 1
-y0 <- 1
-theta <- 30 * pi/180
+x0 <- 4.7
+y0 <- 4.4
+theta <- 330 * pi/180
 d <- 5
 x1 <- x0 + d * cos(theta)
 y1 <- y0 + d * sin(theta)
 
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+yfrac <- 1 - (y0 - floor(y0))
+
 dx <- 1/tan(theta)
 if (theta > 0 && theta < pi) {
   dy <- 1
 } else {
   dy <- -1
+  yfrac <- (y0 - floor(y0))
 }
 
 if (theta > pi) {
@@ -53,17 +60,20 @@ if (theta > pi) {
 }
 
 horizontal_df <- data.frame(
-  x = x0 + seq(5) * dx,
-  y = y0 + seq(5) * dy
+  x = x0 + yfrac * dx + seq.int(0, 4) * dx,
+  y = y0 + yfrac * dy + seq.int(0, 4) * dy
 )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+xfrac <- 1 - (x0 - floor(x0))
+
 dy <-   tan(theta)
 if (theta > 3*pi/2 || theta < pi/2) {
   dx <- 1
 } else {
   dx <- -1
+  xfrac <- x0 - floor(x0)
 }
 
 if (theta > pi/2 && theta < 3*pi/2) {
@@ -71,25 +81,27 @@ if (theta > pi/2 && theta < 3*pi/2) {
 }
 
 vertical_df <- data.frame(
-  x = x0 + seq(5) * dx,
-  y = y0 + seq(5) * dy
+  x = x0 + xfrac * dx + seq.int(0, 4) * dx,
+  y = y0 + xfrac * dy + seq.int(0, 4) * dy
 )
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the DDA view
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+dunit <- 'cm'
 start <- Sys.time()
 grid.rect(gp = gpar(fill='white'))
-grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = 'in')
-grid.points(x0, y0, default.units = 'in')
-grid.lines(c(x0, x1), c(y0, y1), default.units = 'in')
+grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
+          gp = gpar(fill = df$col))
+grid.points(x0, y0, default.units = dunit)
+grid.lines(c(x0, x1), c(y0, y1), default.units = dunit)
 
-grid.points(horizontal_df$x, horizontal_df$y, default.units = 'in', 
-            gp = gpar(col = 'blue'))
+grid.points(horizontal_df$x, horizontal_df$y, default.units = dunit,
+            gp = gpar(col = 'blue'), pch='|')
 
-grid.points(vertical_df$x, vertical_df$y, default.units = 'in', 
-            gp = gpar(col = 'red'))
+grid.points(vertical_df$x, vertical_df$y, default.units = dunit,
+            gp = gpar(col = 'red'), pch='-')
 Sys.time() - start
 
 
