@@ -14,12 +14,20 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+```{r}
+N <- 9
+mat <- matrix(seq(N*N), N, N)
+```
+
+
 ```{r setup}
 library(eventloop)
 library(ggplot2)
 library(dplyr)
 library(purrr)
 library(grid)
+library(magrittr)
 
 N <- 9
 set.seed(1)
@@ -28,6 +36,7 @@ mat[1,] <- 1
 mat[N,] <- 1
 mat[,1] <- 1
 mat[,N] <- 1
+# mat <- matrix(seq(N*N), N, N)
 
 df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
@@ -36,8 +45,8 @@ df$col <- ifelse(df$val == 1, 'grey70', 'white')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 4.7
-y0 <- 3
-theta <- 30 * pi/180
+y0 <- 3.4
+theta <- 210 * pi/180
 d <- 5
 x1 <- x0 + d * cos(theta)
 y1 <- y0 + d * sin(theta)
@@ -60,10 +69,14 @@ if (theta > pi) {
   dx <- -dx
 }
 
-horizontal_df <- data.frame(
+hor <- data.frame(
   x = x0 + yfrac * dx + seq.int(0, 4) * dx,
   y = y0 + yfrac * dy + seq.int(0, 4) * dy
 )
+
+hor %<>%
+  filter(x > 0, x < N, y > 0, y < N)
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,11 +94,53 @@ if (theta > pi/2 && theta < 3*pi/2) {
   dy <- -dy
 }
 
-vertical_df <- data.frame(
+ver <- data.frame(
   x = x0 + xfrac * dx + seq.int(0, 4) * dx,
   y = y0 + xfrac * dy + seq.int(0, 4) * dy
 )
 
+
+ver %<>%
+  filter(x > 0, x < N, y > 0, y < N)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Quadrant 1
+if (theta > 0 && theta < pi/2) {
+  hhits <- mat[cbind(hor$y + 1, ceiling(hor$x))]
+  vhits <- mat[cbind(ceiling(ver$y), ver$x + 1)]
+} else if (theta > pi/2 && theta < pi) {
+  # Quadrant 2
+  hhits <- mat[cbind(hor$y + 1, ceiling(hor$x))]
+  vhits <- mat[cbind(ceiling(ver$y), ver$x)]
+} else if (theta > pi && theta < 3*pi/2) {
+  # Quadrant 3
+  hhits <- mat[cbind(hor$y, ceiling(hor$x))]
+  vhits <- mat[cbind(ceiling(ver$y), ver$x)]
+} else if (theta > 3*pi/2 && theta < 2*pi) {
+  # Quadrant 4
+  hhits <- mat[cbind(hor$y, ceiling(hor$x))]
+  vhits <- mat[cbind(ceiling(ver$y), ver$x + 1)]
+} else {
+  stop("Bad quadrant")
+}
+
+hfirst <- which.max(hhits)
+vfirst <- which.max(vhits)
+
+hbest <- hor[hfirst,]
+vbest <- ver[vfirst,]
+
+
+hdist <- sqrt((hbest$x - x0)^2 + (hbest$y - y0)^2)
+vdist <- sqrt((vbest$x - x0)^2 + (vbest$y - y0)^2)
+
+dist <- min(hdist, vdist)
+
+
+xh <- x0 + dist * cos(theta)
+yh <- y0 + dist * sin(theta)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the DDA view
@@ -95,18 +150,29 @@ start <- Sys.time()
 grid.rect(gp = gpar(fill='white'))
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
           gp = gpar(fill = df$col))
+grid.text(df$val,df$x, df$y, default.units = dunit, gp = gpar(col = 'grey80'))
 grid.points(x0, y0, default.units = dunit)
 grid.lines(c(x0, x1), c(y0, y1), default.units = dunit)
 
-grid.points(horizontal_df$x, horizontal_df$y, default.units = dunit,
-            gp = gpar(col = 'blue'), pch='|')
+if (nrow(hor) > 0) {
+grid.points(hor$x, hor$y, default.units = dunit,
+            gp = gpar(col = 'blue'))
+}
 
-grid.points(vertical_df$x, vertical_df$y, default.units = dunit,
-            gp = gpar(col = 'red'), pch='-')
+if (nrow(ver) > 0) {
+  grid.points(ver$x, ver$y, default.units = dunit,
+            gp = gpar(col = 'red'))
+}
+
+grid.lines(c(x0, xh), c(y0, yh), default.units = dunit, 
+           gp = gpar(col = 'darkgreen', lwd = 4))
+
+
 Sys.time() - start
-
-
-
-
-
 ```
+
+
+
+
+
+
