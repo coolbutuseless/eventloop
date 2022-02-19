@@ -42,7 +42,7 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_deg <- 130
+angle_deg <- c(130)
 
 
 # speed_start <- Sys.time()
@@ -53,9 +53,6 @@ angle_deg <- 130
 x0 <- 4.7
 y0 <- 3.4
 theta <- angle_deg * pi/180
-d <- 5
-x1 <- x0 + d * cos(theta)
-y1 <- y0 + d * sin(theta)
 
 quadrant <- as.integer(angle_deg / 90) + 1L
 
@@ -85,7 +82,7 @@ hory <- hory[idx]
 xfrac <- 1 - (x0 - floor(x0))
 
 dy <-   tan(theta)
-if (quadrant %in% c(1, 4)) {
+if (quadrant %in% c(1L, 4L)) {
   dx <- 1
 } else {
   dx <- -1
@@ -159,6 +156,11 @@ grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
           gp = gpar(fill = df$col, col = 'grey50'))
 # grid.text(df$val,df$x, df$y, default.units = dunit, gp = gpar(col = 'grey40'))
 grid.points(x0, y0, default.units = dunit)
+
+
+d <- 5
+x1 <- x0 + d * cos(theta)
+y1 <- y0 + d * sin(theta)
 grid.lines(c(x0, x1), c(y0, y1), default.units = dunit,
            gp = gpar(lty = 2))
 
