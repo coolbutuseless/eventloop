@@ -19,7 +19,7 @@ library(eventloop)
 library(ggplot2)
 library(dplyr)
 library(purrr)
-
+library(grid)
 
 N <- 5
 mat <- matrix(seq(N*N), N, N)
@@ -29,6 +29,8 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 1
 y0 <- 1
 theta <- 30 * pi/180
@@ -36,28 +38,61 @@ d <- 5
 x1 <- x0 + d * cos(theta)
 y1 <- y0 + d * sin(theta)
 
-dy <-   tan(theta)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dx <- 1/tan(theta)
+if (theta > 0 && theta < pi) {
+  dy <- 1
+} else {
+  dy <- -1
+}
+
+if (theta > pi) {
+  dx <- -dx
+}
 
 horizontal_df <- data.frame(
   x = x0 + seq(5) * dx,
-  y = y0 + seq(5)
-)
-
-
-vertical_df <- data.frame(
-  x = x0 + seq(5),
   y = y0 + seq(5) * dy
 )
 
-ggplot(df) +
-  geom_tile(aes(x = x, y = y), fill=NA, colour='black') + 
-  coord_equal() + 
-  theme_void() +
-  annotate('point', x=x0,y=y0) + 
-  annotate('line', x=c(x0, x1), y=c(y0, y1), alpha = 0.3) + 
-  geom_point(data = horizontal_df, aes(x, y), colour = 'blue') + 
-  geom_point(data =   vertical_df, aes(x, y), colour = 'red')
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+dy <-   tan(theta)
+if (theta > 3*pi/2 || theta < pi/2) {
+  dx <- 1
+} else {
+  dx <- -1
+}
+
+if (theta > pi/2 && theta < 3*pi/2) {
+  dy <- -dy
+}
+
+vertical_df <- data.frame(
+  x = x0 + seq(5) * dx,
+  y = y0 + seq(5) * dy
+)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot the DDA view
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+start <- Sys.time()
+grid.rect(gp = gpar(fill='white'))
+grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = 'in')
+grid.points(x0, y0, default.units = 'in')
+grid.lines(c(x0, x1), c(y0, y1), default.units = 'in')
+
+grid.points(horizontal_df$x, horizontal_df$y, default.units = 'in', 
+            gp = gpar(col = 'blue'))
+
+grid.points(vertical_df$x, vertical_df$y, default.units = 'in', 
+            gp = gpar(col = 'red'))
+Sys.time() - start
+
+
 
 
 
