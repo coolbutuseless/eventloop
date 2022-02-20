@@ -42,7 +42,7 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_start = 45
+angle_start = 150
 # start1 <- Sys.time()
 # for (angle_start in 0:359) {
 
@@ -144,8 +144,9 @@ type <- c(htype[hidx], vtype[vidx])
 raw_dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
 dists <- aggregate(raw_dists, by = list(ray = ray), min)
 
-tidx <- aggregate(raw_dists, by = list(ray = ray), which.min)
-types <- type[tidx$x]
+sray <- sort(ray)
+types <- type[order(ray, raw_dists)]
+types <- aggregate(types, list(ray = sray), head, 1)
 
 print(Sys.time() - start_inner)
 
@@ -166,7 +167,10 @@ grid.rect(gp = gpar(fill='lightblue'))
 grid.rect(y = 0.25, height = 0.5, gp = gpar(fill = 'grey70'))
 
 dists2 <- dists$x * cos(seq(-Nangs/2, Nangs/2, length.out = Nangs) * pi/180)
-grid.rect(x = ((Nangs:1)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill='darkblue'))
+
+fill <- c('darkblue', 'blue')[types$x]
+
+grid.rect(x = ((Nangs:1)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill=fill))
 
 
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
