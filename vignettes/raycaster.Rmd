@@ -43,8 +43,8 @@ df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
 angle_start = 150
-# start1 <- Sys.time()
-# for (angle_start in 0:359) {
+start1 <- Sys.time()
+for (angle_start in 0:359) {
 
 angle_deg <- angle_start + seq(0, 30, length.out = 30)
 Nangs <- length(angle_deg)
@@ -159,9 +159,8 @@ yh <- y0 + dists$x * sin(theta_orig)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dunit <- 'cm'
 
-# if (FALSE) {
-# filename <- sprintf("working/raycast/%03i.png", angle_start)
-# png(filename, width=700, height= 700)
+filename <- sprintf("working/raycast/%03i.png", angle_start)
+png(filename, width=700, height= 700)
 
 grid.rect(gp = gpar(fill='lightblue'))
 grid.rect(y = 0.25, height = 0.5, gp = gpar(fill = 'grey70'))
@@ -198,12 +197,10 @@ grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
 grid.polyline(c(rbind(x0, xh)), c(rbind(y0, yh)), default.units = dunit,
            gp = gpar(col = 'darkgreen', lwd = 4), id = rep(seq(Nangs), each = 2))
 
-# dev.off()
-# }
+dev.off()
 
-
-# }
-# print(Sys.time() - start1)
+}
+print(Sys.time() - start1)
 ```
 
 
