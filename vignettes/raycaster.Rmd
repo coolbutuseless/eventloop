@@ -42,9 +42,11 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
+angle_start = 195
+# start1 <- Sys.time()
+# for (angle_start in 0:359) {
 
-angle_deg <- c(30, 130, 230, 330)
-angle_deg <- seq(0, 359, 5)
+angle_deg <- angle_start + seq(0, 30, length.out = 60)
 Nangs <- length(angle_deg)
 
   
@@ -52,6 +54,9 @@ Nangs <- length(angle_deg)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 4.7
 y0 <- 3.4
+
+start_inner <- Sys.time() 
+
 theta_orig <- theta <- angle_deg * pi/180
 theta <- rep(theta, each = N)
 
@@ -103,27 +108,6 @@ very[!idx] <- NA_real_
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Quadrant 1
-# if (quadrant[1] == 1L) {
-#   hhits <- mat[cbind(hory + 1, ceiling(horx))]
-#   vhits <- mat[cbind(ceiling(very), verx + 1)]
-# } else if (quadrant[1] == 2L) {
-#   # Quadrant 2
-#   hhits <- mat[cbind(hory + 1, ceiling(horx))]
-#   vhits <- mat[cbind(ceiling(very), verx)]
-# } else if (quadrant[1] == 3L) {
-#   # Quadrant 3
-#   hhits <- mat[cbind(hory, ceiling(horx))]
-#   vhits <- mat[cbind(ceiling(very), verx)]
-# } else if (quadrant[1] == 4L) {
-#   # Quadrant 4
-#   hhits <- mat[cbind(hory, ceiling(horx))]
-#   vhits <- mat[cbind(ceiling(very), verx + 1)]
-# } else {
-#   stop("Bad quadrant: ", quadrant)
-# }
-
-
 hhits_y <- ifelse(quadrant %in% 1:2, hory + 1, hory)
 hhits_x <- ceiling(horx)
 vhits_y <- ceiling(very)
@@ -156,6 +140,8 @@ ray <- c(fhray, fvray)
 dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
 dists <- aggregate(dists, by = list(ray = ray), min)
 
+print(Sys.time() - start_inner)
+
 xh <- x0 + dists$x * cos(theta_orig)
 yh <- y0 + dists$x * sin(theta_orig)
 
@@ -165,14 +151,14 @@ yh <- y0 + dists$x * sin(theta_orig)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dunit <- 'cm'
 
-
+# if (FALSE) {
 # filename <- sprintf("working/raycast/%03i.png", angle_start)
 # png(filename, width=700, height= 700)
 
 grid.rect(gp = gpar(fill='white'))
 
-# dists <- dists * cos(seq(-14, 15) * pi/180)
-# grid.rect(x = ((30:1)/30), width = 1/30, height = (N - dists)/15, gp = gpar(col=NA, fill='blue'))
+dists2 <- dists$x * cos(seq(-Nangs/2, Nangs/2, length.out = Nangs) * pi/180)
+grid.rect(x = ((Nangs:1)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill='blue'))
 
 
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
@@ -185,7 +171,7 @@ d <- 5
 x1 <- x0 + d * cos(theta_orig)
 y1 <- y0 + d * sin(theta_orig)
 grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
-           gp = gpar(lty = 2), id = rep(seq(Nangs), each = 2))
+           gp = gpar(lty = 2, col = '#80808070'), id = rep(seq(Nangs), each = 2))
 
 # if (length(horx) > 0) {
 # grid.points(horx, hory, default.units = dunit,
@@ -200,6 +186,12 @@ grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
 grid.polyline(c(rbind(x0, xh)), c(rbind(y0, yh)), default.units = dunit,
            gp = gpar(col = 'darkgreen', lwd = 4), id = rep(seq(Nangs), each = 2))
 
+# dev.off()
+# }
+
+
+# }
+# print(Sys.time() - start1)
 ```
 
 
