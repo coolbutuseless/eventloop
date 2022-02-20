@@ -42,21 +42,7 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-# angle_degs <- c(230)
-
-start_start <- Sys.time()
-for (angle_start in seq(1, 359, 3)) {
-
-angle_degs <- (angle_start + 0:29) %% 360
-angle_deg <- angle_degs[1]
-
-
-speed_start <- Sys.time()
-dists <- numeric(length(angle_degs))
-
-speed_start <- Sys.time()
-for (ii in seq_along(angle_degs)) {
-  angle_deg <- angle_degs[ii]
+angle_deg <- c(330)
   
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,7 +50,7 @@ x0 <- 4.7
 y0 <- 3.4
 theta <- angle_deg * pi/180
 
-quadrant <- as.integer(angle_deg / 90) + 1L
+quadrant <- as.integer( (angle_deg %% 360) / 90) + 1L
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,8 +62,8 @@ dy    <- ifelse(quadrant %in% 1:2,     1,        -1)
 yfrac <- ifelse(quadrant %in% 1:2, yfrac, 1 - yfrac)
 dx    <- ifelse(quadrant %in% 1:2,    dx,       -dx)
 
-horx = x0 + yfrac * dx + seq.int(0, 4) * dx
-hory = y0 + yfrac * dy + seq.int(0, 4) * dy
+horx = x0 + (yfrac + seq.int(0, N)) * dx
+hory = y0 + (yfrac + seq.int(0, N)) * dy
 
 idx <- horx > 0 & horx < N & hory > 0 & hory < N
 horx <- horx[idx]
@@ -95,8 +81,8 @@ xfrac <- ifelse(quadrant %in% c(1L, 4L), xfrac, 1 - xfrac)
 dy    <- ifelse(quadrant %in% c(1L, 4L),    dy,       -dy)
 
 
-verx = x0 + xfrac * dx + seq.int(0, 4) * dx
-very = y0 + xfrac * dy + seq.int(0, 4) * dy
+verx = x0 + (xfrac + seq.int(0, N)) * dx
+very = y0 + (xfrac + seq.int(0, N)) * dy
 
 
 idx <- verx > 0 & verx < N & very > 0 & very < N
@@ -148,12 +134,6 @@ if (max(hhits, na.rm=TRUE) == 0) {
 xh <- x0 + dist * cos(theta)
 yh <- y0 + dist * sin(theta)
 
-  dists[ii] <- dist
-
-}  # End speed run
-print(Sys.time() - speed_start)
-
-dists <- dists * cos(seq(-14, 15) * pi/180)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the DDA view
@@ -161,12 +141,13 @@ dists <- dists * cos(seq(-14, 15) * pi/180)
 dunit <- 'cm'
 
 
-filename <- sprintf("working/raycast/%03i.png", angle_start)
-png(filename, width=700, height= 700)
+# filename <- sprintf("working/raycast/%03i.png", angle_start)
+# png(filename, width=700, height= 700)
 
 grid.rect(gp = gpar(fill='white'))
 
-grid.rect(x = ((30:1)/30), width = 1/30, height = (N - dists)/15, gp = gpar(col=NA, fill='blue'))
+# dists <- dists * cos(seq(-14, 15) * pi/180)
+# grid.rect(x = ((30:1)/30), width = 1/30, height = (N - dists)/15, gp = gpar(col=NA, fill='blue'))
 
 
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
@@ -176,8 +157,8 @@ grid.points(x0, y0, default.units = dunit)
 
 
 d <- 5
-x1 <- x0 + d * cos(theta - 15*pi/180)
-y1 <- y0 + d * sin(theta - 15*pi/180)
+x1 <- x0 + d * cos(theta)
+y1 <- y0 + d * sin(theta)
 grid.lines(c(x0, x1), c(y0, y1), default.units = dunit,
            gp = gpar(lty = 2))
 
@@ -191,14 +172,9 @@ grid.lines(c(x0, x1), c(y0, y1), default.units = dunit,
 #             gp = gpar(col = 'red'))
 # }
 
-# grid.lines(c(x0, xh), c(y0, yh), default.units = dunit, 
-#            gp = gpar(col = 'darkgreen', lwd = 4))
+grid.lines(c(x0, xh), c(y0, yh), default.units = dunit,
+           gp = gpar(col = 'darkgreen', lwd = 4))
 
-invisible(dev.off())
-
-} # angle_start
-
-print(Sys.time() - start_start)
 ```
 
 
