@@ -15,11 +15,6 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r}
-N <- 9
-mat <- matrix(seq(N*N), N, N)
-```
-
 
 ```{r setup}
 library(eventloop)
@@ -29,148 +24,174 @@ library(purrr)
 library(grid)
 library(magrittr)
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Generate a random N*N map
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N <- 9
 set.seed(1)
-mat <- matrix(sample(c(0, 1), N*N, replace = TRUE, prob = c(0.85, 0.3)), N, N)
-mat[1,] <- 1
-mat[N,] <- 1
-mat[,1] <- 1
-mat[,N] <- 1
-# mat <- matrix(seq(N*N), N, N)
+map <- matrix(sample(c(0, 1), N*N, replace = TRUE, prob = c(0.85, 0.3)), N, N)
 
-df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
-df$val <- as.vector(mat)
-df$col <- ifelse(df$val == 1, 'grey70', 'white')
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Ensure there are walls at each edge
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+map[1,] <- 1
+map[N,] <- 1
+map[,1] <- 1
+map[,N] <- 1
 
-angle_start = 30
-start1 <- Sys.time()
-for (angle_start in 0:359) {
 
-fov <- 45
-angle_deg <- angle_start + seq(-fov/2, fov/2, length.out = 100)
-Nangs <- length(angle_deg)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Data.frame representation of points so I have total control on how
+# the map is rendered later
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+map_df     <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
+map_df$val <- as.vector(map)
+map_df$col <- ifelse(map_df$val == 1, 'grey70', 'white')
 
-  
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # User position
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-x0 <- 4.7
-y0 <- 3.4
-
-start_inner <- Sys.time() 
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Calculate angle (in radians) and the quadrant this is in
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-theta_orig <- theta <- angle_deg * pi/180
-theta <- rep(theta, each = N)
-
-quadrant <- as.integer( (angle_deg %% 360) / 90) + 1L
-quadrant <- rep(quadrant, each=N)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Intercepts with horizontal walls
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-yfrac <- 1 - (y0 - floor(y0))
-yfrac <- rep(yfrac, N)
-
-dx <- 1/tan(theta)
-dx <- rep(dx, N)
-
-dy    <- ifelse(quadrant %in% 1:2,     1,        -1)
-yfrac <- ifelse(quadrant %in% 1:2, yfrac, 1 - yfrac)
-dx    <- ifelse(quadrant %in% 1:2,    dx,       -dx)
-
-
-mults <- yfrac + rep(seq.int(0, N-1L), times = Nangs)
-horx = x0 + mults * dx
-hory = y0 + mults * dy
-
-idx <- horx > 0 & horx < N & hory > 0 & hory < N
-horx[!idx] <- NA_real_
-hory[!idx] <- NA_real_
+x0  <- 4.7
+y0  <- 3.4
+fov <- 45
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Intercepts with vertical walls
+# Raycast into a map returning a vector of distances and types
+#
+# @param x0,y0 user position
+# @param direction viewing angle in degrees
+#
+# @return list(dists, types)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-xfrac <- 1 - (x0 - floor(x0))
-xfrac <- rep(xfrac, N)
+raycast <- function(x0, y0, direction) {
+  
+  angle_deg <- direction + seq(-fov/2, fov/2, length.out = 100)
+  Nangs     <- length(angle_deg)
 
-dy <-   tan(theta)
-dy <- rep(dy, N)
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Calculate angle (in radians) and the quadrant this is in
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  theta_orig <- theta <- angle_deg * pi/180
+  theta      <- rep(theta, each = N)
+  
+  quadrant <- as.integer( (angle_deg %% 360) / 90) + 1L
+  quadrant <- rep(quadrant, each=N)
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Intercepts with horizontal walls
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  yfrac <- 1 - (y0 - floor(y0))
+  yfrac <- rep(yfrac, N)
+  
+  dx <- 1/tan(theta)
+  dx <- rep(dx, N)
+  
+  dy    <- ifelse(quadrant %in% 1:2,     1,        -1)
+  yfrac <- ifelse(quadrant %in% 1:2, yfrac, 1 - yfrac)
+  dx    <- ifelse(quadrant %in% 1:2,    dx,       -dx)
+  
+  
+  mults <- yfrac + rep(seq.int(0, N-1L), times = Nangs)
+  horx  <- x0 + mults * dx
+  hory  <- y0 + mults * dy
+  
+  # If outside the boundary, then set to NA
+  idx <- horx > 0 & horx < N & hory > 0 & hory < N
+  horx[!idx] <- NA_real_
+  hory[!idx] <- NA_real_
+  
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Intercepts with vertical walls
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  xfrac <- 1 - (x0 - floor(x0))
+  xfrac <- rep(xfrac, N)
+  
+  dy <- tan(theta)
+  dy <- rep(dy, N)
+  
+  dx    <- ifelse(quadrant %in% c(1L, 4L),     1,        -1)
+  xfrac <- ifelse(quadrant %in% c(1L, 4L), xfrac, 1 - xfrac)
+  dy    <- ifelse(quadrant %in% c(1L, 4L),    dy,       -dy)
+  
+  mults <- xfrac + rep(seq.int(0, N-1L), times = Nangs)
+  verx = x0 + mults * dx
+  very = y0 + mults * dy
+  
+  # If outside the boundary, then set to NA
+  idx <- verx > 0 & verx < N & very > 0 & very < N
+  verx[!idx] <- NA_real_
+  very[!idx] <- NA_real_
+  
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # - Find the closest hit of the horizontal and vertical intercepts which intersect
+  #     with a square containing a '1'
+  # - Calculate the distance to the eye at (x0, y0)
+  # - Determine whether the intersection was a horitonatl or vertical intercept
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  hhits_y <- ifelse(quadrant %in% 1:2, hory + 1, hory)
+  hhits_x <- ceiling(horx)
+  vhits_y <- ceiling(very)
+  vhits_x <- ifelse(quadrant %in% c(1L, 4L), verx + 1, verx)
+  
+  hhits <- map[cbind(hhits_y, hhits_x)]
+  vhits <- map[cbind(vhits_y, vhits_x)]
+  
+  hray <- rep(seq(Nangs), each = N)
+  vray <- rep(seq(Nangs), each = N)
+  
+  htype <- rep(1L, length(hory))
+  vtype <- rep(2L, length(very))
+  
+  hidx <- which(hhits == 1)
+  vidx <- which(vhits == 1)
+  
+  
+  fhorx <- horx[hidx]
+  fhory <- hory[hidx]
+  fhray <- hray[hidx]
+  
+  fverx <- verx[vidx]
+  fvery <- very[vidx]
+  fvray <- vray[vidx]
+  
+  
+  x    <- c(fhorx, fverx)
+  y    <- c(fhory, fvery)
+  ray  <- c(fhray, fvray)
+  type <- c(htype[hidx], vtype[vidx])
+  
+  
+  raw_dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
+  dists     <- aggregate(raw_dists, by = list(ray = ray), min)$x
+  
+  sray  <- sort(ray)
+  types <- type[order(ray, raw_dists)]
+  types <- aggregate(types, list(ray = sray), head, 1)$x
+  
+  
+  list(
+    dists = dists,
+    types = types,
+    Nangs = Nangs,
+    theta = theta_orig
+  )
+}
 
-dx    <- ifelse(quadrant %in% c(1L, 4L),     1,        -1)
-xfrac <- ifelse(quadrant %in% c(1L, 4L), xfrac, 1 - xfrac)
-dy    <- ifelse(quadrant %in% c(1L, 4L),    dy,       -dy)
 
-mults <- xfrac + rep(seq.int(0, N-1L), times = Nangs)
-verx = x0 + mults * dx
-very = y0 + mults * dy
-
-
-idx <- verx > 0 & verx < N & very > 0 & very < N
-verx[!idx] <- NA_real_
-very[!idx] <- NA_real_
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# - Find the closest hit of the horizontal and vertical intercepts which intersect
-#     with a square containing a '1'
-# - Calculate the distance to the eye at (x0, y0)
-# - Determine whether the intersection was a horitonatl or vertical intercept
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-hhits_y <- ifelse(quadrant %in% 1:2, hory + 1, hory)
-hhits_x <- ceiling(horx)
-vhits_y <- ceiling(very)
-vhits_x <- ifelse(quadrant %in% c(1L, 4L), verx + 1, verx)
-
-hhits <- mat[cbind(hhits_y, hhits_x)]
-vhits <- mat[cbind(vhits_y, vhits_x)]
-
-hray <- rep(seq(Nangs), each = N)
-vray <- rep(seq(Nangs), each = N)
-
-htype <- rep(1L, length(hory))
-vtype <- rep(2L, length(very))
-
-hidx <- which(hhits == 1)
-vidx <- which(vhits == 1)
-
-
-fhorx <- horx[hidx]
-fhory <- hory[hidx]
-fhray <- hray[hidx]
-
-fverx <- verx[vidx]
-fvery <- very[vidx]
-fvray <- vray[vidx]
-
-
-x   <- c(fhorx, fverx)
-y   <- c(fhory, fvery)
-ray <- c(fhray, fvray)
-type <- c(htype[hidx], vtype[vidx])
-
-
-raw_dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
-dists <- aggregate(raw_dists, by = list(ray = ray), min)$x
-
-sray <- sort(ray)
-types <- type[order(ray, raw_dists)]
-types <- aggregate(types, list(ray = sray), head, 1)$x
-
-# print(Sys.time() - start_inner)
-
+res <- raycast(x0, y0, 230)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot the DDA view
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dunit <- 'cm'
 
-filename <- sprintf("working/raycast/%03i.png", angle_start)
-png(filename, width=700, height= 700)
+# filename <- sprintf("working/raycast/%03i.png", angle_start)
+# png(filename, width=700, height= 700)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -183,16 +204,21 @@ grid.rect(y = 0.25, height = 0.5, gp = gpar(fill = 'grey30'))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Draw the walls
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dists2 <- dists * cos(seq(-fov/2, fov/2, length.out = Nangs) * pi/180)
-fill <- c('#004588', '#002366')[types]
-grid.rect(x = (((Nangs:1)-0.5)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill=fill))
+dists2 <- res$dists * cos(seq(-fov/2, fov/2, length.out = res$Nangs) * pi/180)
+fill <- c('#004588', '#002366')[res$types]
+grid.rect(
+  x = (((res$Nangs:1)-0.5)/res$Nangs), 
+  width = 1/res$Nangs, 
+  height = (N - dists2)/15, 
+  gp = gpar(col=NA, fill=fill)
+)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Overhead view of the map
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
-          gp = gpar(fill = df$col, col = 'grey50', alpha = 0.5))
+grid.rect(x = map_df$x, y = map_df$y, width = 1, height = 1, default.units = dunit,
+          gp = gpar(fill = map_df$col, col = 'grey50', alpha = 0.5))
 grid.points(x0, y0, default.units = dunit)
 
 
@@ -222,15 +248,15 @@ grid.points(x0, y0, default.units = dunit)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Actual Rays
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-xh <- x0 + dists * cos(theta_orig)
-yh <- y0 + dists * sin(theta_orig)
+xh <- x0 + res$dists * cos(res$theta)
+yh <- y0 + res$dists * sin(res$theta)
 grid.polyline(c(rbind(x0, xh)), c(rbind(y0, yh)), default.units = dunit,
-           gp = gpar(col = 'darkgreen', lwd = 1, alpha = 0.5), id = rep(seq(Nangs), each = 2))
+           gp = gpar(col = 'darkgreen', lwd = 1, alpha = 0.5), id = rep(seq(res$Nangs), each = 2))
 
 
-dev.off()
-}
-print(Sys.time() - start1)
+# dev.off()
+# }
+# print(Sys.time() - start1)
 ```
 
 
