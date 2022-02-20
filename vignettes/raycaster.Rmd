@@ -42,97 +42,122 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_deg <- c(330)
+
+angle_deg <- c(30, 130, 230, 330)
+angle_deg <- seq(0, 359, 5)
+Nangs <- length(angle_deg)
+
   
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 4.7
 y0 <- 3.4
-theta <- angle_deg * pi/180
+theta_orig <- theta <- angle_deg * pi/180
+theta <- rep(theta, each = N)
 
 quadrant <- as.integer( (angle_deg %% 360) / 90) + 1L
+quadrant <- rep(quadrant, each=N)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 yfrac <- 1 - (y0 - floor(y0))
+yfrac <- rep(yfrac, N)
 
 dx <- 1/tan(theta)
+dx <- rep(dx, N)
 
 dy    <- ifelse(quadrant %in% 1:2,     1,        -1)
 yfrac <- ifelse(quadrant %in% 1:2, yfrac, 1 - yfrac)
 dx    <- ifelse(quadrant %in% 1:2,    dx,       -dx)
 
-horx = x0 + (yfrac + seq.int(0, N)) * dx
-hory = y0 + (yfrac + seq.int(0, N)) * dy
+
+mults <- yfrac + rep(seq.int(0, N-1L), times = Nangs)
+horx = x0 + mults * dx
+hory = y0 + mults * dy
 
 idx <- horx > 0 & horx < N & hory > 0 & hory < N
-horx <- horx[idx]
-hory <- hory[idx]
+horx[!idx] <- NA_real_
+hory[!idx] <- NA_real_
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 xfrac <- 1 - (x0 - floor(x0))
+xfrac <- rep(xfrac, N)
 
 dy <-   tan(theta)
+dy <- rep(dy, N)
 
 dx    <- ifelse(quadrant %in% c(1L, 4L),     1,        -1)
 xfrac <- ifelse(quadrant %in% c(1L, 4L), xfrac, 1 - xfrac)
 dy    <- ifelse(quadrant %in% c(1L, 4L),    dy,       -dy)
 
-
-verx = x0 + (xfrac + seq.int(0, N)) * dx
-very = y0 + (xfrac + seq.int(0, N)) * dy
+mults <- xfrac + rep(seq.int(0, N-1L), times = Nangs)
+verx = x0 + mults * dx
+very = y0 + mults * dy
 
 
 idx <- verx > 0 & verx < N & very > 0 & very < N
-verx <- verx[idx]
-very <- very[idx]
+verx[!idx] <- NA_real_
+very[!idx] <- NA_real_
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Quadrant 1
-if (quadrant == 1L) {
-  hhits <- mat[cbind(hory + 1, ceiling(horx))]
-  vhits <- mat[cbind(ceiling(very), verx + 1)]
-} else if (quadrant == 2L) {
-  # Quadrant 2
-  hhits <- mat[cbind(hory + 1, ceiling(horx))]
-  vhits <- mat[cbind(ceiling(very), verx)]
-} else if (quadrant == 3L) {
-  # Quadrant 3
-  hhits <- mat[cbind(hory, ceiling(horx))]
-  vhits <- mat[cbind(ceiling(very), verx)]
-} else if (quadrant == 4L) {
-  # Quadrant 4
-  hhits <- mat[cbind(hory, ceiling(horx))]
-  vhits <- mat[cbind(ceiling(very), verx + 1)]
-} else {
-  stop("Bad quadrant: ", quadrant)
-}
+# if (quadrant[1] == 1L) {
+#   hhits <- mat[cbind(hory + 1, ceiling(horx))]
+#   vhits <- mat[cbind(ceiling(very), verx + 1)]
+# } else if (quadrant[1] == 2L) {
+#   # Quadrant 2
+#   hhits <- mat[cbind(hory + 1, ceiling(horx))]
+#   vhits <- mat[cbind(ceiling(very), verx)]
+# } else if (quadrant[1] == 3L) {
+#   # Quadrant 3
+#   hhits <- mat[cbind(hory, ceiling(horx))]
+#   vhits <- mat[cbind(ceiling(very), verx)]
+# } else if (quadrant[1] == 4L) {
+#   # Quadrant 4
+#   hhits <- mat[cbind(hory, ceiling(horx))]
+#   vhits <- mat[cbind(ceiling(very), verx + 1)]
+# } else {
+#   stop("Bad quadrant: ", quadrant)
+# }
 
-hfirst <- which.max(hhits)
-vfirst <- which.max(vhits)
 
-hbestx <- horx[hfirst]
-hbesty <- hory[hfirst]
+hhits_y <- ifelse(quadrant %in% 1:2, hory + 1, hory)
+hhits_x <- ceiling(horx)
+vhits_y <- ceiling(very)
+vhits_x <- ifelse(quadrant %in% c(1L, 4L), verx + 1, verx)
 
-vbestx <- verx[vfirst]
-vbesty <- very[vfirst]
+hhits <- mat[cbind(hhits_y, hhits_x)]
+vhits <- mat[cbind(vhits_y, vhits_x)]
 
-if (max(hhits, na.rm=TRUE) == 0) {
-  dist <- sqrt((vbestx - x0)^2 + (vbesty - y0)^2)
-} else if (max(vhits, na.rm=TRUE) == 0) {
-  dist <- sqrt((hbestx - x0)^2 + (hbesty - y0)^2)
-} else {
-  hdist <- sqrt((hbestx - x0)^2 + (hbesty - y0)^2)
-  vdist <- sqrt((vbestx - x0)^2 + (vbesty - y0)^2)
-  
-  dist <- min(hdist, vdist)
-}
+hray <- rep(seq(Nangs), each = N)
+vray <- rep(seq(Nangs), each = N)
 
-xh <- x0 + dist * cos(theta)
-yh <- y0 + dist * sin(theta)
+hidx <- which(hhits == 1)
+vidx <- which(vhits == 1)
+
+
+fhorx <- horx[hidx]
+fhory <- hory[hidx]
+fhray <- hray[hidx]
+
+fverx <- verx[vidx]
+fvery <- very[vidx]
+fvray <- vray[vidx]
+
+
+x   <- c(fhorx, fverx)
+y   <- c(fhory, fvery)
+ray <- c(fhray, fvray)
+
+
+dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
+dists <- aggregate(dists, by = list(ray = ray), min)
+
+xh <- x0 + dists$x * cos(theta_orig)
+yh <- y0 + dists$x * sin(theta_orig)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -157,10 +182,10 @@ grid.points(x0, y0, default.units = dunit)
 
 
 d <- 5
-x1 <- x0 + d * cos(theta)
-y1 <- y0 + d * sin(theta)
-grid.lines(c(x0, x1), c(y0, y1), default.units = dunit,
-           gp = gpar(lty = 2))
+x1 <- x0 + d * cos(theta_orig)
+y1 <- y0 + d * sin(theta_orig)
+grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
+           gp = gpar(lty = 2), id = rep(seq(Nangs), each = 2))
 
 # if (length(horx) > 0) {
 # grid.points(horx, hory, default.units = dunit,
@@ -172,8 +197,8 @@ grid.lines(c(x0, x1), c(y0, y1), default.units = dunit,
 #             gp = gpar(col = 'red'))
 # }
 
-grid.lines(c(x0, xh), c(y0, yh), default.units = dunit,
-           gp = gpar(col = 'darkgreen', lwd = 4))
+grid.polyline(c(rbind(x0, xh)), c(rbind(y0, yh)), default.units = dunit,
+           gp = gpar(col = 'darkgreen', lwd = 4), id = rep(seq(Nangs), each = 2))
 
 ```
 
