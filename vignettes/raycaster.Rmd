@@ -42,11 +42,12 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_start = 150
-start1 <- Sys.time()
-for (angle_start in 0:359) {
+angle_start = 120
+# start1 <- Sys.time()
+# for (angle_start in 0:359) {
 
-angle_deg <- angle_start + seq(0, 30, length.out = 30)
+fov <- 30
+angle_deg <- angle_start + seq(0, fov, length.out = 100)
 Nangs <- length(angle_deg)
 
   
@@ -148,7 +149,7 @@ sray <- sort(ray)
 types <- type[order(ray, raw_dists)]
 types <- aggregate(types, list(ray = sray), head, 1)
 
-print(Sys.time() - start_inner)
+# print(Sys.time() - start_inner)
 
 xh <- x0 + dists$x * cos(theta_orig)
 yh <- y0 + dists$x * sin(theta_orig)
@@ -159,17 +160,17 @@ yh <- y0 + dists$x * sin(theta_orig)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dunit <- 'cm'
 
-filename <- sprintf("working/raycast/%03i.png", angle_start)
-png(filename, width=700, height= 700)
+# filename <- sprintf("working/raycast/%03i.png", angle_start)
+# png(filename, width=700, height= 700)
 
 grid.rect(gp = gpar(fill='lightblue'))
 grid.rect(y = 0.25, height = 0.5, gp = gpar(fill = 'grey70'))
 
-dists2 <- dists$x * cos(seq(-Nangs/2, Nangs/2, length.out = Nangs) * pi/180)
+dists2 <- dists$x * cos(seq(-fov/2, fov/2, length.out = Nangs) * pi/180)
 
 fill <- c('darkblue', 'blue')[types$x]
 
-grid.rect(x = ((Nangs:1)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill=fill))
+grid.rect(x = (((Nangs:1)-0.5)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill=fill))
 
 
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
@@ -197,10 +198,10 @@ grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
 grid.polyline(c(rbind(x0, xh)), c(rbind(y0, yh)), default.units = dunit,
            gp = gpar(col = 'darkgreen', lwd = 4), id = rep(seq(Nangs), each = 2))
 
-dev.off()
 
-}
-print(Sys.time() - start1)
+# dev.off()
+# }
+# print(Sys.time() - start1)
 ```
 
 
