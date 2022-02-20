@@ -42,11 +42,11 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_start = 195
+angle_start = 45
 # start1 <- Sys.time()
 # for (angle_start in 0:359) {
 
-angle_deg <- angle_start + seq(0, 30, length.out = 60)
+angle_deg <- angle_start + seq(0, 30, length.out = 30)
 Nangs <- length(angle_deg)
 
   
@@ -119,6 +119,9 @@ vhits <- mat[cbind(vhits_y, vhits_x)]
 hray <- rep(seq(Nangs), each = N)
 vray <- rep(seq(Nangs), each = N)
 
+htype <- rep(1L, length(hory))
+vtype <- rep(2L, length(very))
+
 hidx <- which(hhits == 1)
 vidx <- which(vhits == 1)
 
@@ -135,10 +138,14 @@ fvray <- vray[vidx]
 x   <- c(fhorx, fverx)
 y   <- c(fhory, fvery)
 ray <- c(fhray, fvray)
+type <- c(htype[hidx], vtype[vidx])
 
 
-dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
-dists <- aggregate(dists, by = list(ray = ray), min)
+raw_dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
+dists <- aggregate(raw_dists, by = list(ray = ray), min)
+
+tidx <- aggregate(raw_dists, by = list(ray = ray), which.min)
+types <- type[tidx$x]
 
 print(Sys.time() - start_inner)
 
@@ -155,10 +162,11 @@ dunit <- 'cm'
 # filename <- sprintf("working/raycast/%03i.png", angle_start)
 # png(filename, width=700, height= 700)
 
-grid.rect(gp = gpar(fill='white'))
+grid.rect(gp = gpar(fill='lightblue'))
+grid.rect(y = 0.25, height = 0.5, gp = gpar(fill = 'grey70'))
 
 dists2 <- dists$x * cos(seq(-Nangs/2, Nangs/2, length.out = Nangs) * pi/180)
-grid.rect(x = ((Nangs:1)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill='blue'))
+grid.rect(x = ((Nangs:1)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill='darkblue'))
 
 
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
