@@ -42,22 +42,27 @@ df <- expand.grid(y = seq(N)-0.5, x = seq(N)-0.5)
 df$val <- as.vector(mat)
 df$col <- ifelse(df$val == 1, 'grey70', 'white')
 
-angle_start = 120
-# start1 <- Sys.time()
-# for (angle_start in 0:359) {
+angle_start = 30
+start1 <- Sys.time()
+for (angle_start in 0:359) {
 
-fov <- 30
-angle_deg <- angle_start + seq(0, fov, length.out = 100)
+fov <- 45
+angle_deg <- angle_start + seq(-fov/2, fov/2, length.out = 100)
 Nangs <- length(angle_deg)
 
   
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# User position
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0 <- 4.7
 y0 <- 3.4
 
 start_inner <- Sys.time() 
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Calculate angle (in radians) and the quadrant this is in
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 theta_orig <- theta <- angle_deg * pi/180
 theta <- rep(theta, each = N)
 
@@ -65,6 +70,7 @@ quadrant <- as.integer( (angle_deg %% 360) / 90) + 1L
 quadrant <- rep(quadrant, each=N)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Intercepts with horizontal walls
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 yfrac <- 1 - (y0 - floor(y0))
 yfrac <- rep(yfrac, N)
@@ -87,6 +93,7 @@ hory[!idx] <- NA_real_
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Intercepts with vertical walls
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 xfrac <- 1 - (x0 - floor(x0))
 xfrac <- rep(xfrac, N)
@@ -107,7 +114,12 @@ idx <- verx > 0 & verx < N & very > 0 & very < N
 verx[!idx] <- NA_real_
 very[!idx] <- NA_real_
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# - Find the closest hit of the horizontal and vertical intercepts which intersect
+#     with a square containing a '1'
+# - Calculate the distance to the eye at (x0, y0)
+# - Determine whether the intersection was a horitonatl or vertical intercept
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 hhits_y <- ifelse(quadrant %in% 1:2, hory + 1, hory)
 hhits_x <- ceiling(horx)
@@ -143,16 +155,13 @@ type <- c(htype[hidx], vtype[vidx])
 
 
 raw_dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
-dists <- aggregate(raw_dists, by = list(ray = ray), min)
+dists <- aggregate(raw_dists, by = list(ray = ray), min)$x
 
 sray <- sort(ray)
 types <- type[order(ray, raw_dists)]
-types <- aggregate(types, list(ray = sray), head, 1)
+types <- aggregate(types, list(ray = sray), head, 1)$x
 
 # print(Sys.time() - start_inner)
-
-xh <- x0 + dists$x * cos(theta_orig)
-yh <- y0 + dists$x * sin(theta_orig)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,31 +169,46 @@ yh <- y0 + dists$x * sin(theta_orig)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dunit <- 'cm'
 
-# filename <- sprintf("working/raycast/%03i.png", angle_start)
-# png(filename, width=700, height= 700)
+filename <- sprintf("working/raycast/%03i.png", angle_start)
+png(filename, width=700, height= 700)
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Sky and ground
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 grid.rect(gp = gpar(fill='lightblue'))
-grid.rect(y = 0.25, height = 0.5, gp = gpar(fill = 'grey70'))
+grid.rect(y = 0.25, height = 0.5, gp = gpar(fill = 'grey30'))
 
-dists2 <- dists$x * cos(seq(-fov/2, fov/2, length.out = Nangs) * pi/180)
 
-fill <- c('darkblue', 'blue')[types$x]
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Draw the walls
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+dists2 <- dists * cos(seq(-fov/2, fov/2, length.out = Nangs) * pi/180)
+fill <- c('#004588', '#002366')[types]
 grid.rect(x = (((Nangs:1)-0.5)/Nangs), width = 1/Nangs, height = (N - dists2)/15, gp = gpar(col=NA, fill=fill))
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Overhead view of the map
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 grid.rect(x = df$x, y = df$y, width = 1, height = 1, default.units = dunit,
-          gp = gpar(fill = df$col, col = 'grey50'))
-# grid.text(df$val,df$x, df$y, default.units = dunit, gp = gpar(col = 'grey40'))
+          gp = gpar(fill = df$col, col = 'grey50', alpha = 0.5))
 grid.points(x0, y0, default.units = dunit)
 
 
-d <- 5
-x1 <- x0 + d * cos(theta_orig)
-y1 <- y0 + d * sin(theta_orig)
-grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
-           gp = gpar(lty = 2, col = '#80808070'), id = rep(seq(Nangs), each = 2))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Probe rays
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# d <- 5
+# x1 <- x0 + d * cos(theta_orig)
+# y1 <- y0 + d * sin(theta_orig)
+# grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
+#            gp = gpar(lty = 2, col = '#80808070'), id = rep(seq(Nangs), each = 2))
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Intersections with horizontal and vertical boundaries
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # if (length(horx) > 0) {
 # grid.points(horx, hory, default.units = dunit,
 #             gp = gpar(col = 'blue'))
@@ -195,13 +219,18 @@ grid.polyline(c(rbind(x0, x1)), c(rbind(y0, y1)), default.units = dunit,
 #             gp = gpar(col = 'red'))
 # }
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Actual Rays
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+xh <- x0 + dists * cos(theta_orig)
+yh <- y0 + dists * sin(theta_orig)
 grid.polyline(c(rbind(x0, xh)), c(rbind(y0, yh)), default.units = dunit,
-           gp = gpar(col = 'darkgreen', lwd = 4), id = rep(seq(Nangs), each = 2))
+           gp = gpar(col = 'darkgreen', lwd = 1, alpha = 0.5), id = rep(seq(Nangs), each = 2))
 
 
-# dev.off()
-# }
-# print(Sys.time() - start1)
+dev.off()
+}
+print(Sys.time() - start1)
 ```
 
 
