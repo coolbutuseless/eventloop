@@ -18,11 +18,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(eventloop)
-library(ggplot2)
-library(dplyr)
-library(purrr)
 library(grid)
-library(magrittr)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,15 +26,15 @@ library(magrittr)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N <- 9
 set.seed(1)
-map <- matrix(sample(c(0, 1), N*N, replace = TRUE, prob = c(0.85, 0.3)), N, N)
+map <- matrix(sample(c(0L, 1L), N*N, replace = TRUE, prob = c(0.85, 0.3)), N, N)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Ensure there are walls at each edge
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-map[1,] <- 1
-map[N,] <- 1
-map[,1] <- 1
-map[,N] <- 1
+map[1,] <- 1L
+map[N,] <- 1L
+map[,1] <- 1L
+map[,N] <- 1L
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,8 +62,9 @@ fov <- 60
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 raycast <- function(x0, y0, direction) {
   
-  angle_deg <- direction + seq(-fov/2, fov/2, length.out = 100)
-  Nangs     <- length(angle_deg)
+  Nangs      <- 100
+  ray_spread <- seq(-fov/2, fov/2, length.out = Nangs)
+  angle_deg  <- direction + ray_spread
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Calculate angle (in radians) and the quadrant this is in
@@ -167,16 +164,28 @@ raycast <- function(x0, y0, direction) {
   raw_dists <- sqrt( (x - x0)^2 + (y - y0)^2 )
   dists     <- aggregate(raw_dists, by = list(ray = ray), min)$x
   
+  # Correct for fish eye / lens distortion
+  dists0 <- dists
+  dists  <- dists * cos(ray_spread * pi/180)
+  
+  # Precalculate some heights
+  heights <- 0.75 * 1/dists
+  
+  # work out the type of ray. was this a vertical or horitonal intercept?
+  # I think this is wrong, but it works somehow???
   sray  <- sort(ray)
   types <- type[order(ray, raw_dists)]
   types <- aggregate(types, list(ray = sray), head, 1)$x
   
   
+  
   list(
-    dists = dists,
-    types = types,
-    Nangs = Nangs,
-    theta = theta_orig
+    dists0  = dists0,
+    dists   = dists,
+    heights = heights,
+    types   = types,
+    Nangs   = Nangs,
+    theta   = theta_orig
   )
 }
 
@@ -199,12 +208,12 @@ plot_raycast <- function(res, show_map = FALSE) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Draw the walls
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  dists2 <- res$dists * cos(seq(-fov/2, fov/2, length.out = res$Nangs) * pi/180)
   fill <- c('#004588', '#002366')[res$types]
   grid.rect(
     x      = ((res$Nangs:1)-0.5)/res$Nangs, 
     width  = 1/res$Nangs, 
-    height = (N - dists2)/15, 
+    # height = (N - dists2)/15, 
+    height = res$heights,
     gp     = gpar(col=NA, fill=fill)
   )
   
@@ -217,8 +226,8 @@ plot_raycast <- function(res, show_map = FALSE) {
               gp = gpar(fill = map_df$col, col = 'grey50', alpha = 0.5))
     grid.points(x0, y0, default.units = dunit)
     
-    xh <- x0 + res$dists * cos(res$theta)
-    yh <- y0 + res$dists * sin(res$theta)
+    xh <- x0 + res$dists0 * cos(res$theta)
+    yh <- y0 + res$dists0 * sin(res$theta)
     grid.polyline(
       x = c(rbind(x0, xh)), 
       y = c(rbind(y0, yh)), 
@@ -295,22 +304,9 @@ eventloop::run_loop(wolf)
 
 
 ```{r setup}
-# filename <- sprintf("working/raycast/%03i.png", angle_start)
-# png(filename, width=700, height= 700)
 
-# x11(type='dbcairo', antialias = 'none')
-# dev.control(displaylist = 'inhibit')
-# 
-# start <- Sys.time()
-# for (i in seq(0, 359)) {
-#   cat(".")
-#   res <- raycast(x0, y0, i)
-#   dev.hold()
-#   plot_raycast(res, show_map = TRUE)
-#   dev.flush()
-# }
-# print(Sys.time() - start)
-
+  res <- raycast(4.5, 3.5, 30)
+  plot_raycast(res, show_map = TRUE)
 
 ```
 
