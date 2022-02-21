@@ -47,12 +47,6 @@ map_df$col <- ifelse(map_df$val == 1, 'grey70', 'white')
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# User position
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-fov <- 60
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Raycast into a map returning a vector of distances and types
 #
 # @param x0,y0 user position
@@ -60,17 +54,19 @@ fov <- 60
 #
 # @return list(dists, types)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-raycast <- function(x0, y0, direction) {
-  
-  Nangs      <- 100
-  ray_spread <- seq(-fov/2, fov/2, length.out = Nangs)
+raycast <- function(x0, y0, direction, fov = 60, Nrays = 100) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Calculate all the rays to encompass the given field-of-view
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  ray_spread <- seq(-fov/2, fov/2, length.out = Nrays)
   angle_deg  <- direction + ray_spread
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Calculate angle (in radians) and the quadrant this is in
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  theta_orig <- theta <- angle_deg * pi/180
-  theta      <- rep(theta, each = N)
+  theta_orig <- angle_deg * pi/180
+  theta      <- rep(theta_orig, each = N)
   
   quadrant <- as.integer( (angle_deg %% 360) / 90) + 1L
   quadrant <- rep(quadrant, each=N)
@@ -89,7 +85,7 @@ raycast <- function(x0, y0, direction) {
   dx    <- ifelse(quadrant %in% 1:2,    dx,       -dx)
   
   
-  mults <- yfrac + rep(seq.int(0, N-1L), times = Nangs)
+  mults <- yfrac + rep(seq.int(0, N-1L), times = Nrays)
   horx  <- x0 + mults * dx
   hory  <- y0 + mults * dy
   
@@ -112,7 +108,7 @@ raycast <- function(x0, y0, direction) {
   xfrac <- ifelse(quadrant %in% c(1L, 4L), xfrac, 1 - xfrac)
   dy    <- ifelse(quadrant %in% c(1L, 4L),    dy,       -dy)
   
-  mults <- xfrac + rep(seq.int(0, N-1L), times = Nangs)
+  mults <- xfrac + rep(seq.int(0, N-1L), times = Nrays)
   verx = x0 + mults * dx
   very = y0 + mults * dy
   
@@ -136,8 +132,8 @@ raycast <- function(x0, y0, direction) {
   hhits <- map[cbind(hhits_y, hhits_x)]
   vhits <- map[cbind(vhits_y, vhits_x)]
   
-  hray <- rep(seq(Nangs), each = N)
-  vray <- rep(seq(Nangs), each = N)
+  hray <- rep(seq(Nrays), each = N)
+  vray <- rep(seq(Nrays), each = N)
   
   htype <- rep(1L, length(hory))
   vtype <- rep(2L, length(very))
@@ -184,7 +180,7 @@ raycast <- function(x0, y0, direction) {
     dists   = dists,
     heights = heights,
     types   = types,
-    Nangs   = Nangs,
+    Nrays   = Nrays,
     theta   = theta_orig
   )
 }
@@ -210,8 +206,8 @@ plot_raycast <- function(res, show_map = FALSE) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   fill <- c('#004588', '#002366')[res$types]
   grid.rect(
-    x      = ((res$Nangs:1)-0.5)/res$Nangs, 
-    width  = 1/res$Nangs, 
+    x      = ((res$Nrays:1)-0.5)/res$Nrays, 
+    width  = 1/res$Nrays, 
     # height = (N - dists2)/15, 
     height = res$heights,
     gp     = gpar(col=NA, fill=fill)
@@ -237,7 +233,7 @@ plot_raycast <- function(res, show_map = FALSE) {
         lwd   = 1, 
         alpha = 0.5
       ), 
-      id = rep(seq(res$Nangs), each = 2)
+      id = rep(seq(res$Nrays), each = 2)
     )
   }
 }
@@ -245,7 +241,7 @@ plot_raycast <- function(res, show_map = FALSE) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Globals
+# Globals- starting user position and direction
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 x0  <- 4.7
 y0  <- 3.4
@@ -271,9 +267,9 @@ wolf <- function() {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (!is.null(event) && event$type == 'key') {
     if (event$char == 'Left') {
-      angle <<- angle + 3.1
+      angle <<- angle + 3
     } else if (event$char == 'Right') {
-      angle <<- angle - 3.1
+      angle <<- angle - 3
     } else if (event$char == 'Up') {
       x0 <<- x0 + cos(angle * pi/180)/10
       y0 <<- y0 + sin(angle * pi/180)/10
