@@ -52,7 +52,7 @@ scale <- rep(min_size, nrow(points))
 #  - fps          frames per second in last 100 frames
 #  - frame        current frame number (integer sequence starting from 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-flipper <- function() {
+canvas <- function() {
 
   # Highlight points near mouse
   near <- (abs(points$x - x)+ abs(points$y - y)) < (1.4 * r)
@@ -84,6 +84,11 @@ flipper <- function() {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run the loop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop(flipper, 10, 10)
-
+run_loop(canvas, 10, 10)
 ```
+
+
+<video controls>
+  <source src="images/interact.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 

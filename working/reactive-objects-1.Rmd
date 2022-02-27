@@ -1,0 +1,102 @@
+---
+title: "Reactive Objects 1"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reactive Objects 1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, eval = FALSE}
+library(eventloop)
+library(grid)
+library(R6)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Class representing a circle which maximizes its size when mouse is close
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Circle <- R6::R6Class(
+  "Circle",
+  public = list(
+    state  = NULL,
+    x      = NULL,
+    y      = NULL,
+    r      = NULL,
+    fill   = NULL,
+
+    initialize = function(x = 0.5, y = 0.5, r = 0.5) {
+      self$state <- 0.05
+      self$x     <- x
+      self$y     <- y
+      self$r     <- r
+      self$fill  <- sample(viridisLite::cividis(100), 1)
+
+      invisible(self)
+    },
+
+    # draw this object
+    draw = function(x, y) {
+
+      # When mouse is near, then make full size
+      if (abs(self$x - x) < 0.1 && abs(self$y - y) < 0.1) {
+        self$state <- 1
+      }
+
+      # draw a scaled circle
+      grid::grid.circle(
+        x = self$x, y = self$y,
+        r = self$r * self$state, gp = grid::gpar(fill = self$fill, col = NA)
+      )
+
+      # each call decays the size to its baseline value
+      self$state <- max(0.05, self$state - 0.025)
+
+      invisible(self)
+    }
+  )
+)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Initialise list of R6 objects
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+pos <- c(1, 3, 5, 7, 9)/10
+r   <- 1 / 5/ 2
+circles <- list()
+for (i in seq_along(pos)) {
+  for (j in seq_along(pos)) {
+    circles <- append(circles, Circle$new(x = pos[i], y = pos[j], r = r))
+  }
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define the operations to be performed each loop
+#
+#  Standard variables defined as part of rendering framework
+#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
+#  - X, Y         mouse coordinates in pixels
+#  - width,height dimensions of window in pixels
+#  - fps          frames per second in last 100 frames
+#  - frame        current frame number (integer sequence starting from 1)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+flipper <- function() {
+  grid::grid.rect(gp = grid::gpar(fill = 'white'))
+  for (circle in circles) {
+    circle$draw(x, y)
+  }
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run the loop
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+run_loop(flipper, 7, 7, target_fps = 20)
+```

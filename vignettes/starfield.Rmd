@@ -80,3 +80,10 @@ starfield <- function() {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 run_loop(starfield, target_fps = 60)
 ```
+
+
+
+<video controls>
+  <source src="images/starfield.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
