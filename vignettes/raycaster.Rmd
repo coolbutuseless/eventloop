@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 
 
-```{r setup}
+```{r setup, eval = FALSE}
 library(eventloop)
 library(grid)
 
@@ -299,7 +299,7 @@ eventloop::run_loop(wolf)
 ```
 
 
-```{r setup}
+```{r eval = FALSE}
 
   res <- raycast(4.5, 3.5, 30)
   plot_raycast(res, show_map = TRUE)
