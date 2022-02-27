@@ -3,8 +3,11 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Sleep in seconds
 #'
-#' Avoid \code{Sys.sleep()} in event loops as per docuemntation for
-#' \code{grDevices:::getGraphicsEvent}.  \code{Sys.sleep()} actually removes
+#' This is a custom bit of C code to pause the computer for a bit.
+#'
+#' For an eventloop, need to avoid \code{Sys.sleep()}, as discussed in the
+#'  documentation for
+#' \code{grDevices:::getGraphicsEvent}.  This is because \code{Sys.sleep()} actually removes
 #' pending graphics events and is going to mess up this whole system.
 #'
 #' @param seconds time in seconds. can be fractional. will be converted to
