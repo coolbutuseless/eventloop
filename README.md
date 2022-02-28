@@ -93,6 +93,13 @@ Quartz, X11 (cairo/nbcairo/dbcairo) nativeraster, raster
     junk in the displaylist that you never ever need.
 -   how to turn it off
 
+## Note on new.page()
+
+grid.newpage() does a lot of work.
+
+But since I have displaylists turned off, just paint over everything
+with a white rectangle rather than call ‘newpage()’
+
 ## Events supported by R graphics devices
 
 -   Include a table here comparing the capabilities of quartz(),
@@ -151,7 +158,28 @@ Solution: short bit of C code to sleep for a bit.
     -   Probably a better way to do this sanely, but it works OK for now
         (This was almost the title for this talk)
 
+## Put it all together
+
+-   Initialise a fast graphics device with double buffering: x11 with
+    ‘dbcairo’
+-   Disable antialiasing, disable displaylist
+-   Setup event handlers for keys + mouse
+    -   information about events is stored in an environment
+-   Use the users supplied function as part of the onIdle callback
+-   The actual onIdle callback
+    -   updates frame number
+    -   calculates FPS over last N frames
+    -   gets any events from the keyboard and mouse and adds them as
+        variables in the environment of the user’s function
+    -   calls the users callback function
+    -   adds a delay (if necessary) to keep to the required FPS
+
+Insert here an animated or multi-page schematic showing the state of the
+system, what happens when a user presses a key
+
 ## Examples
+
+Show captured mp4s of these. Too risky to do live!
 
 -   Starfield
 -   Game of life
@@ -162,17 +190,18 @@ Solution: short bit of C code to sleep for a bit.
 
 -   Only the real `x11()` device on a unix or macOS system has the
     `onIdle` mechanism to make this work.
+-   There is an `x11()` on windows but it is just a wrapper around
+    `windows()` device.
 -   Sometimes the device gets locked in a slow state on macOS. I am
     unsure on why this happens, but when it does I need to
     logout-then-login to return to the high-speed state.
 
-## Future
+## Future in R
 
 -   Campaign for `onIdle` to be added to `windows()` device.
 -   Campaign for keyboard, mouse + idle events for quartz()
     -   quartz may be quite legacy + bomb-proof
     -   is there need for a new device for modern macs?
--   a KeyPress event that can return multiple keys
 
 ## Installation
 
@@ -183,6 +212,13 @@ You can install from
 # install.package('remotes')
 remotes::install_github('coolbutuseless/eventloop')
 ```
+
+## Example - Raycaster
+
+<video controls>
+<source src="man/figures/raycaster.mp4" type="video/mp4">
+
+Your browser does not support the video tag. </video>
 
 ## Example - colour cycling
 
