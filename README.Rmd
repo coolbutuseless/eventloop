@@ -36,6 +36,8 @@ R graphics device at speeds fast enough to be considered interesting for
 games and other 'realtime' animated possiblilities.
 
 
+## What is an Event Loop?
+
 An event loop (or 'game loop', or 'interactive loop') is a programming pattern
 where the system processes user input, but does other duties while waiting for that input.
 
@@ -52,6 +54,24 @@ greeblies.  When the user gives input (e.g. pressing the 'jump' button), the
 system handles that user input - while also taking time to keep updating the
 greeblies and spaceshipts etc.
 
+## Where might you witness a game loop?
+
+* Video games
+    * Is the user doing anything?
+    * Yes! - start doing what the user asked
+    * Regardless of what the user is doing, update the spaceships and greelibes,
+      play the next mustical note of the tune, scroll the screen 1-pixel sideways.
+* Interactive applications e.g. VLC video player.
+    * Is the user doing anything?
+    * Yes! Change volume, increase brightness. Do what the user requested.
+    * Regardless of what the user requested decode the next frame of video and
+      display it on the screen
+      
+* Include a couple of flow diagrams/decision trees to illustrate the concept.      
+      
+      
+## Where can you find event loops in R?
+
 Currently 'shiny' may be the the most common R frameworks for development of interactive programs.  It is a powerful framework which taps into a "reactive web application" 
 mode of operations - which all has a few too many layers of abstraction
 to be fast.
@@ -60,7 +80,9 @@ In the wider programming world, [`processing`](https://processing.org/) is a gre
 game programming loop that uses a domain specific interaction language (built
 upon a Java backend).
 
-## What's needed for a successful event loop for games?  (And how do we achieve them in R?)
+## What's needed for a successful event loop?  (And how do we achieve them in R?)
+
+The core of this presentation: how do we get each of these tings in R?
 
 * Fast display - draw quickly
 * non-blocking events 
@@ -73,27 +95,42 @@ upon a Java backend).
 * Global State
 
 
-## Events supported by R graphics devices
+## Fast displays
 
-* Include a table here comparing the capabilities of quartz(), windows() and
-  x11().  Also Rstudio device.  i.e.
-    * keyboard events?
-    * mouse events?
-    * on idle?
-    * general speed of rendering?
+* Show timing for 2 benchmarks
+    * Display an image as fast as possible
+    * Display a nativeraster as fast as possible.
     
-## canGenOnIdle is the key
+Speed Conclusions:
+    * For an x11 device in 'cairo', nativeraster is faaast.
+    * For window 'nativeraster' isn't an advantage. 
+    * Show some raw FPS numbers here
+    * Show data on all of the following: 
+        * Windows, Quartz, X11 (cairo/nbcairo/dbcairo) 
+        nativeraster, raster
 
-* Have the computer run a function while waiting for input!
     
-## Devices and 'displaylists'
+## Speed2: Devices and 'displaylists'
 
 * What are displaylists? Capture a list of all rendering commands
 * Most often seen when re-sizing a window - display list gets re-run.
 * See the effect of displaylists if we turn them off and try some of our usual things
 * When rendering at 30fps for a long time, that's going to be a lot of junk 
   in the displaylist that you never ever need.
-* how to turn it off
+* how to turn it off    
+
+## Events supported by R graphics devices
+
+* Include a table here comparing the capabilities of quartz(), windows() and
+  x11(). 
+    * Rstudio device, quartz, x11, windows
+    * keyboard, mouse, onIdle 
+
+
+## canGenOnIdle is the key
+
+* Have the computer run a function while waiting for input!
+
 
 ## Double buffering
 
@@ -111,7 +148,7 @@ If we let the idle loop run as fast as possible, it's possibly gonig to
 run too fast!
 
 Greeblies/enemy spaceships updating at 100 times a second could get difficult
-to update in a consistent manner.
+to show on screen in a consistent manner.
 
 So put a governor on the FPS to try and only run our core function at 30fps
 (or whatever).
@@ -123,7 +160,7 @@ control the overall rate.
 
 Problem: you can't use `Sys.sleep()` in an event loop!
 
-Solution: short bit of code to sleep for a bit.  
+Solution: short bit of C code to sleep for a bit.  
 
 
 ## Fast code
@@ -160,11 +197,11 @@ Solution: short bit of code to sleep for a bit.
 
 ## Future
 
-* Campaign for `onIdle` to be added to `windows()` devices
-* Add mouse, keyboard event handlers to `quartz()`. Or need to 
-  start a new device?  Some feeling is that this uses quite legacy interfaces
-  that are rock solid and tested.  
-    * But how do we access the fast graphics available in modern macs?
+* Campaign for `onIdle` to be added to `windows()` device.
+* Campaign for keyboard, mouse + idle events for quartz()
+    * quartz may be quite legacy + bomb-proof
+    * is there need for a new device for modern macs?
+* a KeyPress event that can return multiple keys
 
 
 ## Installation
