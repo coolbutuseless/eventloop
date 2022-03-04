@@ -2,7 +2,6 @@
 
 export(fps_governor)
 export(run_loop)
-export(sleep)
 import(grDevices)
 import(graphics)
 useDynLib(eventloop, .registration=TRUE)

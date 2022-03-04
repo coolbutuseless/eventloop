@@ -81,7 +81,7 @@ asteroids <- function() {
   xpos <<- xpos + xvel
   ypos <<- ypos + yvel
   xpos <<- ifelse(xpos < 0, 1 + xpos, ifelse(xpos > 1, xpos - 1, xpos))
-  ypos <<- ifelse(ypos < 0, 1 + xpos, ifelse(ypos > 1, ypos - 1, ypos))
+  ypos <<- ifelse(ypos < 0, 1 + ypos, ifelse(ypos > 1, ypos - 1, ypos))
 
   # Calc and draw new ship orientation + position
   ship_x <- ship_poly_x * cos(angle) - ship_poly_y * sin(angle) + unit(xpos, 'npc')
@@ -123,7 +123,7 @@ asteroids <- function() {
   sleep(0.025)
 }
 
-run_loop(asteroids, 7, 7)
+run_loop(asteroids, 7, 7, target_fps = 50)
 ```
 
  <video controls>

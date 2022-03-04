@@ -12,13 +12,6 @@
 
 
 
-SEXP sleep_(SEXP seconds_) {
-  usleep(asReal(seconds_) * 1e6);
-  return R_NilValue;
-}
-
-
-
 SEXP fps_governor_(SEXP fps_) {
   static int init = 0;
   static double fps = 30;

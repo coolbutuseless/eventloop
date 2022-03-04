@@ -78,7 +78,7 @@ starfield <- function() {
 # Start an interactive render loop around this function
 # Note: Your OS must support this device:  x11(type = 'dbcairo')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop(starfield, target_fps = 60)
+run_loop(starfield, target_fps = 30)
 ```
 
 

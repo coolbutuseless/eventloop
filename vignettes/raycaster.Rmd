@@ -293,7 +293,7 @@ wolf <- function() {
   )
 }
 
-eventloop::run_loop(wolf)
+eventloop::run_loop(wolf, target_fps = 30)
 
 
 ```

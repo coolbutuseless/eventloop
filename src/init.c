@@ -3,12 +3,10 @@
 #include <R.h>
 #include <Rinternals.h>
 
-extern SEXP sleep_();
 extern SEXP fps_governor_();
 
 static const R_CallMethodDef CEntries[] = {
 
-  {"sleep_", (DL_FUNC) &sleep_, 1},
   {"fps_governor_", (DL_FUNC) &fps_governor_, 1},
   {NULL , NULL, 0}
 };
