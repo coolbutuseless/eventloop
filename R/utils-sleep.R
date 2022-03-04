@@ -18,3 +18,12 @@
 sleep <- function(seconds) {
   invisible(.Call(sleep_, seconds))
 }
+
+
+#' @rdname sleep
+#' @param fps frames per second
+#' @return actual fps calculated over last 10 frames
+#' @export
+fps_governor <- function(fps) {
+  .Call(fps_governor_, fps)
+}

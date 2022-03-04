@@ -2,13 +2,21 @@
 % Please edit documentation in R/utils-sleep.R
 \name{sleep}
 \alias{sleep}
+\alias{fps_governor}
 \title{Sleep in seconds}
 \usage{
 sleep(seconds)
+
+fps_governor(fps)
 }
 \arguments{
 \item{seconds}{time in seconds. can be fractional. will be converted to
 microseconds and called with 'usleep()' in C}
+
+\item{fps}{frames per second}
+}
+\value{
+actual fps calculated over last 10 frames
 }
 \description{
 This is a custom bit of C code to pause the computer for a bit.

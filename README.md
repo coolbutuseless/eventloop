@@ -213,13 +213,6 @@ You can install from
 remotes::install_github('coolbutuseless/eventloop')
 ```
 
-## Example - Raycaster
-
-<video controls>
-<source src="man/figures/raycaster.mp4" type="video/mp4">
-
-Your browser does not support the video tag. </video>
-
 ## Example - colour cycling
 
 The following is a basic interactive example.
@@ -290,6 +283,14 @@ colour_cycle <- function() {
 
 run_loop(colour_cycle, 7, 7)
 ```
+
+## Example - Raycaster
+
+See
+[vignette](https://coolbutuseless.github.io/package/eventloop/articles/raycaster.html)
+for code for this example.
+
+<img src="man/figures/raycaster.gif" />
 
 ## Related Software
 
