@@ -49,6 +49,7 @@ SEXP fps_governor_(SEXP fps_) {
       (checkpoint_time.tv_sec + checkpoint_time.tv_usec/1000000.0);
     fps = 10 / actual;
     memcpy(&checkpoint_time, &this_time, sizeof(struct timeval));
+    // Rprintf(">> %.2f", fps);
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -108,10 +108,7 @@ gen_onIdle <- function(user_func, target_fps = 20) {
   func_env$height <- 0
   func_env$width  <- 0
 
-  func_env$fps    <- target_fps
-  func_env$time1  <- Sys.time()
-  func_env$timeN  <- Sys.time()
-  func_env$sleep  <- 1 / target_fps - 0.0065 # 0.006 = approx total overhead
+  func_env$fps    <- fps_governor(target_fps)
 
   first_frame <- TRUE
 
@@ -140,42 +137,12 @@ gen_onIdle <- function(user_func, target_fps = 20) {
     grDevices::dev.flush()
 
 
-    # if (!is.null(target_fps)) {
-    #   N <- as.integer(3 * target_fps)
-    #   if (func_env$frame %% N == 0) {
-    #     actual_time <- as.numeric(difftime(Sys.time(), func_env$timeN, units = 'secs'))
-    #     func_env$fps <- N / actual_time
-    #
-    #     expected_time <- N / target_fps
-    #     adjust <- (expected_time - actual_time) / N
-    #
-    #     func_env$sleep <- func_env$sleep + adjust
-    #     cat(func_env$fps, target_fps, adjust, func_env$sleep, "\n")
-    #
-    #     func_env$timeN <- Sys.time()
-    #   }
-    #
-    #
-    #   if (func_env$sleep > 0) {
-    #     sleep(func_env$sleep)
-    #   }
-    # }
 
-    N <- 30
-    if (func_env$frame %% 30 == 0) {
-      actual_time <- as.numeric(difftime(Sys.time(), func_env$timeN, units = 'secs'))
-      func_env$fps <- N / actual_time
-      func_env$timeN <- Sys.time()
-    }
-
-    # sleep(0.03)
-
-
-
+    # Clear the events
     event_env$event <- NULL
     func_env$event  <- NULL
 
-    # Something here to track/maintain FPS
+    func_env$fps    <- fps_governor(target_fps)
 
     NULL
   }
