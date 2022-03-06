@@ -22,7 +22,7 @@ library(eventloop)
 colours <- rainbow(100)
 latch   <- FALSE
 
-colour_cycle <- function() {
+colour_cycle <- function(event, x, y, frame, fps, width, height, ...) {
   if (!is.null(event)) {
     if (event$type == 'mouse_down') {
       latch <<- TRUE

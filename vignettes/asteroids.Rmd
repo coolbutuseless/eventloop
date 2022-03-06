@@ -46,14 +46,8 @@ asyvel <- runif(Nasteroids)/200
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the operations to be performed each loop
-#
-#  Standard variables defined as part of rendering framework
-#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
-#  - width,height dimensions of window in pixels
-#  - fps          frames per second in last 100 frames
-#  - frame        current frame number (integer sequence starting from 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-asteroids <- function() {
+asteroids <- function(event, x, y, frame, fps, width, height, ...) {
   grid::grid.rect(gp = grid::gpar(fill = 'black'))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

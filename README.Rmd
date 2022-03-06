@@ -38,6 +38,8 @@ games and other 'realtime' animated possiblilities.
 
 ## ToDo before release:
 
+* rename 'x' to mouse_x, y to 'mouse_y', frame to 'frame_num', 
+# include 'fps_target', and 'fps_actual'
 * Add an argument "show_fps" to auto configure the FPS display.
 
 
@@ -271,14 +273,8 @@ latch   <- FALSE
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the operations to be performed each loop
-#
-#  Standard variables defined as part of rendering framework
-#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
-#  - width,height dimensions of window in pixels
-#  - fps          frames per second in last 100 frames
-#  - frame        current frame number (integer sequence starting from 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-colour_cycle <- function() {
+colour_cycle <- function(event, x, y, frame, fps, width, height, ...) {
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # If there has been an event, then process it

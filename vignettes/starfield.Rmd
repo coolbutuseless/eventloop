@@ -35,7 +35,7 @@ ys <- runif(1000)
 #  - fps          frames per second in last 100 frames
 #  - frame        current frame number (integer sequence starting from 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-starfield <- function() {
+starfield <- function(event, x, y, frame, fps, width, height, ...) {
 
   # Set the centre for expansion/rotation to be the current mouse (x,y)
   # could just set to centre to (0.5, 0.5) for non-interactive case

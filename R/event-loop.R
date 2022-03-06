@@ -96,19 +96,11 @@ onKeybd <- function(char) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Set a whole bunchof things that are going to be part of the function
-  # environment
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  func_env <- environment(user_func)
-  func_env$event  <- NULL
-  func_env$frame  <- 0L
-  func_env$x      <- 0
-  func_env$y      <- 0
-  func_env$fps    <- fps_governor(target_fps)
-  func_env$width  <- graphics::grconvertX(1, 'ndc', 'device')
-  func_env$height <- graphics::grconvertY(0, 'ndc', 'device')
-
+  x         <- 0
+  y         <- 0
+  width     <- graphics::grconvertX(1, 'ndc', 'device')
+  height    <- graphics::grconvertY(0, 'ndc', 'device')
+  frame_num <- 0L
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Generate the actual callback function which wraps the user-given function
@@ -124,14 +116,14 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
     # If an event actually happened (i.e. event != NULL)
     #  - copy the x/y coords into the user_func() environment
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    event_env      <- grDevices::getGraphicsEventEnv(which = this_dev)
-    event          <- event_env$event
-    func_env$event <- event
-    func_env$frame <- func_env$frame + 1L
+    event_env <- grDevices::getGraphicsEventEnv(which = this_dev)
+    event     <- event_env$event
+
+    frame_num <<- frame_num + 1L
 
     if (!is.null(event) && event$type %in% c('mouse_move', 'mouse_down', 'mouse_up')) {
-      func_env$x <- event$x
-      func_env$y <- event$y
+      x <<- event$x
+      y <<- event$y
     }
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,20 +132,23 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
     # Probably devices where this will help:  x11(type='dbcairo'), quartz()
     #  and windows()
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    fps <- fps_governor(target_fps)
     grDevices::dev.hold()
-    user_func()
+    user_func(
+      event  = event_env$event,
+      x      = x,
+      y      = y,
+      frame  = frame_num,
+      fps    = fps,
+      width  = width,
+      height = height
+    )
     grDevices::dev.flush()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Clear the events
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     event_env$event <- NULL
-    func_env$event  <- NULL
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Regulate the FPS rate
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    func_env$fps    <- fps_governor(target_fps)
 
     NULL
   }
