@@ -71,14 +71,6 @@ game_of_life <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
 
   # Draw the GameOfLife grid
   grid.raster(1L - g, interpolate = FALSE)
-
-  # Add 'FPS' count to window
-  grid::grid.rect(x = 0, y = 0, width = 0.5, height = 0.1,
-                  gp = grid::gpar(fill = 'black'))
-  grid::grid.text(
-    label = paste("FPS:", round(fps)), x = 0.01, y = 0.01,
-    just = c('left', 'bottom'), gp = grid::gpar(fontfamily = 'mono', cex = 2, col = 'white')
-  )
 }
 
 

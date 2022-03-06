@@ -67,10 +67,6 @@ starfield <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
     y = grid::unit(ys, 'npc'),
     pch = '+'
   )
-  grid::grid.text(
-    label = paste("FPS:", round(fps)), x = 0.01, y = 0.01,
-    just = c('left', 'bottom'), gp = grid::gpar(fontfamily = 'mono', cex = 2)
-  )
 }
 
 
@@ -78,7 +74,7 @@ starfield <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
 # Start an interactive render loop around this function
 # Note: Your OS must support this device:  x11(type = 'dbcairo')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop(starfield, target_fps = 30)
+run_loop(starfield, fps_target = 30)
 ```
 
 

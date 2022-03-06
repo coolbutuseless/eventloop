@@ -4,16 +4,18 @@
 \alias{run_loop}
 \title{Run the user supplied function as the idle function within the event loop}
 \usage{
-run_loop(user_func, width = 7, height = 7, target_fps = 30)
+run_loop(user_func, width = 7, height = 7, fps_target = 30, show_fps = TRUE)
 }
 \arguments{
 \item{user_func}{user function}
 
 \item{width, height}{size of graphics device to open. Default: 7x7 inches}
 
-\item{target_fps}{target frames-per-second.  If rendering speed surpasses
+\item{fps_target}{target frames-per-second.  If rendering speed surpasses
 this then slight pauses will be added to each loop to bring this
 back to the target rate}
+
+\item{show_fps}{autmatically show the fps}
 }
 \value{
 NULL.  The user function is run over-and-over within the event

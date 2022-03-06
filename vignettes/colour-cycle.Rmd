@@ -41,8 +41,6 @@ colour_cycle <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
   }
 
   grid::grid.rect(gp = grid::gpar(fill = col))
-  grid::grid.text(label = paste("FPS: ", round(fps)), x = 0.01, y = 0.01, just = c('left', 'bottom'),
-                  gp = grid::gpar(fontfamily = 'mono', cex = 2))
 }
 
 

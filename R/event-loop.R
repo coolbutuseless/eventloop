@@ -94,7 +94,7 @@ onKeybd <- function(char) {
 # This onIdle function prepares variables in the function environment so
 # the user doesn't have to do as much.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
+gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
 
   x         <- 0.5
   y         <- 0.5
@@ -132,7 +132,7 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
     # Probably devices where this will help:  x11(type='dbcairo'), quartz()
     #  and windows()
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    fps <- fps_governor(target_fps)
+    fps <- fps_governor(fps_target)
     grDevices::dev.hold()
     user_func(
       event      = event_env$event,
@@ -140,10 +140,38 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
       mouse_y    = y,
       frame_num  = frame_num,
       fps_actual = fps,
-      fps_target = target_fps,
+      fps_target = fps_target,
       dev_width  = width,
       dev_height = height
     )
+
+    if (show_fps) {
+      # Add in FPS info in bottom corner
+      grid::grid.rect(
+        x      = 0,
+        y      = 0,
+        width  = grid::unit(250, 'points'),
+        height = grid::unit( 55, 'points'),
+        gp = grid::gpar(
+          fill  = 'white',
+          alpha = 0.5
+        )
+      )
+
+      grid::grid.text(
+        label = paste("FPS:", round(fps)),
+        x     = 0.01,
+        y     = 0.01,
+        just  = c('left', 'bottom'),
+        gp = grid::gpar(
+          fontfamily = 'mono',
+          cex        = 2,
+          col        = 'black'
+        )
+      )
+    }
+
+
     grDevices::dev.flush()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,9 +190,10 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
 #'
 #' @param user_func user function
 #' @param width,height size of graphics device to open. Default: 7x7 inches
-#' @param target_fps target frames-per-second.  If rendering speed surpasses
+#' @param fps_target target frames-per-second.  If rendering speed surpasses
 #'        this then slight pauses will be added to each loop to bring this
 #'        back to the target rate
+#' @param show_fps autmatically show the fps
 #'
 #' @return NULL.  The user function is run over-and-over within the event
 #'         loop.
@@ -174,7 +203,7 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
 #'
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop <- function(user_func, width = 7, height = 7, target_fps = 30) {
+run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = TRUE) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create a device and capture its device number.
@@ -194,7 +223,8 @@ run_loop <- function(user_func, width = 7, height = 7, target_fps = 30) {
   # Wrap the users function in the infrastructure which passes in
   # all the parameters at each call.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  onIdle <- gen_onIdle(user_func, target_fps = target_fps, this_dev = this_dev)
+  onIdle <- gen_onIdle(user_func, fps_target = fps_target,
+                       show_fps = show_fps, this_dev = this_dev)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Set up the events on this device
