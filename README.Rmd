@@ -38,10 +38,7 @@ games and other 'realtime' animated possiblilities.
 
 ## ToDo before release:
 
-* rename 'x' to mouse_x, y to 'mouse_y', frame to 'frame_num', 
-# include 'fps_target', and 'fps_actual'
-* Add an argument "show_fps" to auto configure the FPS display.
-
+* Currently empty
 
 ## What is an Event Loop?
 
@@ -298,7 +295,7 @@ colour_cycle <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
   # otherwise set colour to white
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (latch) {
-    col <- colours[[(frame %% 100) + 1L]]
+    col <- colours[[(frame_num %% 100) + 1L]]
   } else {
     col <- 'white'
   }
@@ -308,14 +305,10 @@ colour_cycle <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
   # Draw an FPS counter
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   grid::grid.rect(gp = grid::gpar(fill = col))
-  grid::grid.text(
-    label = paste("FPS: ", round(fps)), x = 0.01, y = 0.01, just = c('left', 'bottom'),
-    gp = grid::gpar(fontfamily = 'mono', cex = 2)
-  )
 }
 
 
-run_loop(colour_cycle, 7, 7)
+run_loop(colour_cycle, 7, 7, show_fps = TRUE)
 
 ```
 
