@@ -13,7 +13,9 @@ run_loop(user_func, width = 7, height = 7, fps_target = 30, show_fps = TRUE)
 
 \item{fps_target}{target frames-per-second.  If rendering speed surpasses
 this then slight pauses will be added to each loop to bring this
-back to the target rate}
+back to the target rate. Set to NA to run as fast as possible.  Note
+that even though the user supplied function might be called at a very
+high rate, the actual screen update rate may be much much lower.}
 
 \item{show_fps}{autmatically show the fps}
 }

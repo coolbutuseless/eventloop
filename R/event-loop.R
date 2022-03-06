@@ -102,6 +102,8 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
   height    <- graphics::grconvertY(0, 'ndc', 'device')
   frame_num <- 0L
 
+  fps_target <- as.numeric(fps_target)
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Generate the actual callback function which wraps the user-given function
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,6 +135,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
     #  and windows()
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     fps <- fps_governor(fps_target)
+
     grDevices::dev.hold()
     user_func(
       event      = event_env$event,
@@ -192,7 +195,9 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
 #' @param width,height size of graphics device to open. Default: 7x7 inches
 #' @param fps_target target frames-per-second.  If rendering speed surpasses
 #'        this then slight pauses will be added to each loop to bring this
-#'        back to the target rate
+#'        back to the target rate. Set to NA to run as fast as possible.  Note
+#'        that even though the user supplied function might be called at a very
+#'        high rate, the actual screen update rate may be much much lower.
 #' @param show_fps autmatically show the fps
 #'
 #' @return NULL.  The user function is run over-and-over within the event
