@@ -169,7 +169,7 @@ control the overall rate.
 
 Problem: you can't use `Sys.sleep()` in an event loop!
 
-Solution: short bit of C code to sleep for a bit.  
+Solution: short bit of C code to help govern the call rate.
 
 
 ## Fast code

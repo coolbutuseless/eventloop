@@ -119,11 +119,9 @@ asteroids <- function() {
     label = paste("FPS:", round(fps)), x = 0.01, y = 0.01,
     just = c('left', 'bottom'), gp = grid::gpar(fontfamily = 'mono', cex = 2, col = 'white')
   )
-
-  sleep(0.025)
 }
 
-run_loop(asteroids, 7, 7, target_fps = 50)
+run_loop(asteroids, 7, 7)
 ```
 
  <video controls>
