@@ -36,6 +36,12 @@ R graphics device at speeds fast enough to be considered interesting for
 games and other 'realtime' animated possiblilities.
 
 
+## ToDo before release:
+
+* grDevices::getGraphicsEventEnv() and other functions should all 
+  refer to a particular device.
+
+
 ## What is an Event Loop?
 
 An event loop (or 'game loop', or 'interactive loop') is a programming pattern
