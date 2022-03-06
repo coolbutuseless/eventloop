@@ -113,12 +113,9 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
   func_env$y      <- 0
   func_env$X      <- 0
   func_env$Y      <- 0
-  func_env$height <- 0
-  func_env$width  <- 0
-
   func_env$fps    <- fps_governor(target_fps)
-
-  first_frame <- TRUE
+  func_env$width  <- graphics::grconvertX(1, 'ndc', 'device')
+  func_env$height <- graphics::grconvertY(0, 'ndc', 'device')
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,13 +142,6 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
       func_env$y <- event$y
       func_env$X <- event$X
       func_env$Y <- event$Y
-    }
-
-    if (first_frame) {
-      func_env$width  <- graphics::grconvertX(1, 'ndc', 'device')
-      func_env$height <- graphics::grconvertY(0, 'ndc', 'device')
-      func_env$starttime <- Sys.time()
-      first_frame <<- FALSE
     }
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
