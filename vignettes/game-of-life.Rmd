@@ -32,7 +32,8 @@ latch <- FALSE
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the operations to be performed each loop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-game_of_life <- function(event, x, y, frame, fps, width, height, ...) {
+game_of_life <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                         fps_taget, dev_width, dev_height, ...) {
 
   if (!is.null(event)) {
     if (event$type == 'mouse_down') {
@@ -43,7 +44,7 @@ game_of_life <- function(event, x, y, frame, fps, width, height, ...) {
   }
 
   if (latch) {
-    g[as.integer((1 - y) * (N-1) + 1), as.integer(x * (N-1) + 1)] <<- 1L
+    g[as.integer((1 - mouse_y) * (N-1) + 1), as.integer(mouse_x * (N-1) + 1)] <<- 1L
   } else {
     
     # Neighbours, everybody needs good neighbours....

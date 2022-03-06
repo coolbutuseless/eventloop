@@ -96,8 +96,8 @@ onKeybd <- function(char) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
 
-  x         <- 0
-  y         <- 0
+  x         <- 0.5
+  y         <- 0.5
   width     <- graphics::grconvertX(1, 'ndc', 'device')
   height    <- graphics::grconvertY(0, 'ndc', 'device')
   frame_num <- 0L
@@ -135,13 +135,14 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
     fps <- fps_governor(target_fps)
     grDevices::dev.hold()
     user_func(
-      event  = event_env$event,
-      x      = x,
-      y      = y,
-      frame  = frame_num,
-      fps    = fps,
-      width  = width,
-      height = height
+      event      = event_env$event,
+      mouse_x    = x,
+      mouse_y    = y,
+      frame_num  = frame_num,
+      fps_actual = fps,
+      fps_target = target_fps,
+      dev_width  = width,
+      dev_height = height
     )
     grDevices::dev.flush()
 

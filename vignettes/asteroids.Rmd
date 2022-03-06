@@ -47,7 +47,8 @@ asyvel <- runif(Nasteroids)/200
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the operations to be performed each loop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-asteroids <- function(event, x, y, frame, fps, width, height, ...) {
+asteroids <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                         fps_taget, dev_width, dev_height, ...) {
   grid::grid.rect(gp = grid::gpar(fill = 'black'))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

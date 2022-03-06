@@ -274,7 +274,8 @@ latch   <- FALSE
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the operations to be performed each loop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-colour_cycle <- function(event, x, y, frame, fps, width, height, ...) {
+colour_cycle <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                         fps_taget, dev_width, dev_height, ...) {
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # If there has been an event, then process it
@@ -285,7 +286,7 @@ colour_cycle <- function(event, x, y, frame, fps, width, height, ...) {
   if (!is.null(event)) {
     if (event$type == 'mouse_down') {
       latch <<- TRUE
-      msg <- sprintf("(%.1f, %.1f), (%f, %f) %.1f", x, y, width, height, fps)
+      msg <- sprintf("(%.1f, %.1f), (%f, %f) %.1f", mouse_x, mouse_y, dev_width, dev_height, fps_actual)
       cat(msg, "\n")
     } else if (event$type == 'mouse_up') {
       latch <<- FALSE
