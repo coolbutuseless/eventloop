@@ -9,12 +9,10 @@ onMouseDown <- function(button, x, y) {
   event_env <- grDevices::getGraphicsEventEnv()
 
   event_env$event <- list(
-    type   = 'click',
+    type   = 'mouse_down',
     button = button,
     x      = x,
-    y      = y,
-    X      = graphics::grconvertX(x, 'ndc', 'device'),
-    Y      = graphics::grconvertY(y, 'ndc', 'device')
+    y      = y
   )
 
   NULL
@@ -30,12 +28,10 @@ onMouseUp <- function(button, x, y) {
   event_env <- getGraphicsEventEnv()
 
   event_env$event <- list(
-    type   = 'release',
+    type   = 'mouse_up',
     button = button,
     x      = x,
-    y      = y,
-    X      = graphics::grconvertX(x, 'ndc', 'device'),
-    Y      = graphics::grconvertY(y, 'ndc', 'device')
+    y      = y
   )
 
   NULL
@@ -52,12 +48,10 @@ onMouseMove <- function(button, x, y) {
 
   if (is.null(event_env$event)) {
     event_env$event <- list(
-      type   = 'move',
+      type   = 'mouse_move',
       button = button,
       x      = x,
-      y      = y,
-      X      = graphics::grconvertX(x, 'ndc', 'device'),
-      Y      = graphics::grconvertY(y, 'ndc', 'device')
+      y      = y
     )
   }
 
@@ -74,7 +68,7 @@ onKeybd <- function(char) {
   event_env <- grDevices::getGraphicsEventEnv()
 
   event_env$event <- list(
-    type = 'key',
+    type = 'key_press',
     char = char,
     int  = utf8ToInt(char)
   )
@@ -111,8 +105,6 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
   func_env$frame  <- 0L
   func_env$x      <- 0
   func_env$y      <- 0
-  func_env$X      <- 0
-  func_env$Y      <- 0
   func_env$fps    <- fps_governor(target_fps)
   func_env$width  <- graphics::grconvertX(1, 'ndc', 'device')
   func_env$height <- graphics::grconvertY(0, 'ndc', 'device')
@@ -137,11 +129,9 @@ gen_onIdle <- function(user_func, target_fps = 30, this_dev) {
     func_env$event <- event
     func_env$frame <- func_env$frame + 1L
 
-    if (!is.null(event) && event$type %in% c('move', 'click', 'release')) {
+    if (!is.null(event) && event$type %in% c('mouse_move', 'mouse_down', 'mouse_up')) {
       func_env$x <- event$x
       func_env$y <- event$y
-      func_env$X <- event$X
-      func_env$Y <- event$Y
     }
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

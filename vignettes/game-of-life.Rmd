@@ -34,7 +34,6 @@ latch <- FALSE
 #
 #  Standard variables defined as part of rendering framework
 #  - x, y         coordinates of mouse in npc i.e. range [0, 1]
-#  - X, Y         mouse coordinates in pixels
 #  - width,height dimensions of window in pixels
 #  - fps          frames per second in last 100 frames
 #  - frame        current frame number (integer sequence starting from 1)
@@ -42,9 +41,9 @@ latch <- FALSE
 game_of_life <- function() {
 
   if (!is.null(event)) {
-    if (event$type == 'click') {
+    if (event$type == 'mouse_down') {
       latch <<- TRUE
-    } else if (event$type == 'release') {
+    } else if (event$type == 'mouse_up') {
       latch <<- FALSE
     }
   }

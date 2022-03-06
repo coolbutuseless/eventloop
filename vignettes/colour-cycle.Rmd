@@ -24,11 +24,11 @@ latch   <- FALSE
 
 colour_cycle <- function() {
   if (!is.null(event)) {
-    if (event$type == 'click') {
+    if (event$type == 'mouse_down') {
       latch <<- TRUE
-      msg <- sprintf("(%.1f, %.1f) (%.1f, %.1f), (%f, %f) %.1f", x, y, X, Y, width, height, fps)
+      msg <- sprintf("(%.1f, %.1f), (%f, %f) %.1f", x, y, width, height, fps)
       cat(msg, "\n")
-    } else if (event$type == 'release') {
+    } else if (event$type == 'mouse_up') {
       latch <<- FALSE
     }
   }

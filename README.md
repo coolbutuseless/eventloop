@@ -12,6 +12,10 @@
 R graphics device at speeds fast enough to be considered interesting for
 games and other ‘realtime’ animated possiblilities.
 
+## ToDo before release:
+
+-   Add an argument “show_fps” to auto configure the FPS display.
+
 ## What is an Event Loop?
 
 An event loop (or ‘game loop’, or ‘interactive loop’) is a programming
@@ -140,7 +144,7 @@ control the overall rate.
 
 Problem: you can’t use `Sys.sleep()` in an event loop!
 
-Solution: short bit of C code to sleep for a bit.
+Solution: short bit of C code to help govern the call rate.
 
 ## Fast code
 
@@ -236,7 +240,6 @@ latch   <- FALSE
 #
 #  Standard variables defined as part of rendering framework
 #  - x, y         coordinates of mouse in npc i.e. range [0, 1]
-#  - X, Y         mouse coordinates in pixels
 #  - width,height dimensions of window in pixels
 #  - fps          frames per second in last 100 frames
 #  - frame        current frame number (integer sequence starting from 1)
@@ -250,11 +253,11 @@ colour_cycle <- function() {
   #   - sets 'latch' to FALSE when the mouse button is released
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (!is.null(event)) {
-    if (event$type == 'click') {
+    if (event$type == 'mouse_down') {
       latch <<- TRUE
-      msg <- sprintf("(%.1f, %.1f) (%.1f, %.1f), (%f, %f) %.1f", x, y, X, Y, width, height, fps)
+      msg <- sprintf("(%.1f, %.1f), (%f, %f) %.1f", x, y, width, height, fps)
       cat(msg, "\n")
-    } else if (event$type == 'release') {
+    } else if (event$type == 'mouse_up') {
       latch <<- FALSE
     }
   }

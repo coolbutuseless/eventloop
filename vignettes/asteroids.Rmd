@@ -49,7 +49,6 @@ asyvel <- runif(Nasteroids)/200
 #
 #  Standard variables defined as part of rendering framework
 #  - x, y         coordinates of mouse in npc i.e. range [0, 1]
-#  - X, Y         mouse coordinates in pixels
 #  - width,height dimensions of window in pixels
 #  - fps          frames per second in last 100 frames
 #  - frame        current frame number (integer sequence starting from 1)
@@ -60,7 +59,7 @@ asteroids <- function() {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Keyboard control Left/Right/Up
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if (!is.null(event) && event$type == 'key') {
+  if (!is.null(event) && event$type == 'key_press') {
     if (event$char == 'Left') {
       angle <<- angle + 8 * pi/180
     } else if (event$char == 'Right') {
