@@ -4,7 +4,7 @@
 \alias{run_loop}
 \title{Run the user supplied function as the idle function within the event loop}
 \usage{
-run_loop(user_func, width = 7, height = 7, fps_target = 30, show_fps = TRUE)
+run_loop(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE)
 }
 \arguments{
 \item{user_func}{user function}
@@ -17,11 +17,11 @@ back to the target rate. Set to NA to run as fast as possible.  Note
 that even though the user supplied function might be called at a very
 high rate, the actual screen update rate may be much much lower.}
 
-\item{show_fps}{autmatically show the fps}
+\item{show_fps}{show the fps. default: FALSE}
 }
 \value{
-NULL.  The user function is run over-and-over within the event
-        loop.
+This function returns only when the user presses \code{ESC} within
+        the window, or some other terminating condition occurs.
 }
 \description{
 Run the user supplied function as the idle function within the event loop

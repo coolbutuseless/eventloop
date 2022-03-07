@@ -1,8 +1,12 @@
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse Click
+# Mouse Down - a button on the mouse is pressed
+#
 # - The event loop will terminate as soon as this returns any non-NULL object
+# - So just capture the information about the event and put it in the
+#   graphics event environment
+# - The onIdle callback will use this event data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 onMouseDown <- function(button, x, y) {
 
@@ -20,8 +24,12 @@ onMouseDown <- function(button, x, y) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse release
+# Mouse Up - a button on the mouse is released
+#
 # - The event loop will terminate as soon as this returns any non-NULL object
+# - So just capture the information about the event and put it in the
+#   graphics event environment
+# - The onIdle callback will use this event data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 onMouseUp <- function(button, x, y) {
 
@@ -39,8 +47,12 @@ onMouseUp <- function(button, x, y) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse Move
+# Mouse Move - the mouse is moved within the window
+#
 # - The event loop will terminate as soon as this returns any non-NULL object
+# - So just capture the information about the event and put it in the
+#   graphics event environment
+# - The onIdle callback will use this event data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 onMouseMove <- function(button, x, y) {
 
@@ -60,8 +72,12 @@ onMouseMove <- function(button, x, y) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keyboard handler
+# Key Press = a key is pressed
+#
 # - The event loop will terminate as soon as this returns any non-NULL object
+# - So just capture the information about the event and put it in the
+#   graphics event environment
+# - The onIdle callback will use this event data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 onKeybd <- function(char) {
 
@@ -96,16 +112,30 @@ onKeybd <- function(char) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
 
-  x         <- 0.5
-  y         <- 0.5
-  width     <- graphics::grconvertX(1, 'ndc', 'device')
-  height    <- graphics::grconvertY(0, 'ndc', 'device')
-  frame_num <- 0L
+  x          <- 0.5
+  y          <- 0.5
+  width      <- graphics::grconvertX(1, 'ndc', 'device')
+  height     <- graphics::grconvertY(0, 'ndc', 'device')
+  frame_num  <- 0L
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Make extra, extra sure that 'fps_target' is a numeric, as this is
+  # used in 'fps_governor' and treated as if it *MUST* be numeric or
+  # NA_REAL.  Any other value handed into the C code could be segfault-y
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (is.null(fps_target)) fps_target <- NA_real_
   fps_target <- as.numeric(fps_target)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Generate the actual callback function which wraps the user-given function
+  # Define the actual callback function which wraps the user-given function
+  # This function:
+  #   - stores any current (x,y) coords (regardless of whether the user
+  #     handles them in some other way on a per-event basis within the
+  #     user_func()
+  #   - advances the frame_num by 1
+  #   - checks in with the fps_governor()
+  #   - calls the user_func()
+  #   - tidies up
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   function() {
 
@@ -129,27 +159,33 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
     }
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Try and maintain the 'fps_target' set by the user.
+    # The return value is the 'actual_fps' that's currently happening
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    fps_actual <- fps_governor(fps_target)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # To prevent tearing, call a 'dev.hold()' first, then call the
     # users function, then fluh the device
     # Probably devices where this will help:  x11(type='dbcairo'), quartz()
     #  and windows()
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    fps <- fps_governor(fps_target)
-
     grDevices::dev.hold()
     user_func(
       event      = event_env$event,
       mouse_x    = x,
       mouse_y    = y,
       frame_num  = frame_num,
-      fps_actual = fps,
+      fps_actual = fps_actual,
       fps_target = fps_target,
       dev_width  = width,
       dev_height = height
     )
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Add in FPS info in bottom corner if requested
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (show_fps) {
-      # Add in FPS info in bottom corner
       grid::grid.rect(
         x      = 0,
         y      = 0,
@@ -162,7 +198,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
       )
 
       grid::grid.text(
-        label = paste("FPS:", round(fps)),
+        label = paste("FPS:", round(fps_actual)),
         x     = 0.01,
         y     = 0.01,
         just  = c('left', 'bottom'),
@@ -175,10 +211,14 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
     }
 
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Flush the drawing commands to the device
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     grDevices::dev.flush()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Clear the events
+    # Clear the event after each call to the user_func()
+    # If the user hasn't handled it by now, they've missed it.
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     event_env$event <- NULL
 
@@ -198,17 +238,17 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
 #'        back to the target rate. Set to NA to run as fast as possible.  Note
 #'        that even though the user supplied function might be called at a very
 #'        high rate, the actual screen update rate may be much much lower.
-#' @param show_fps autmatically show the fps
+#' @param show_fps show the fps. default: FALSE
 #'
-#' @return NULL.  The user function is run over-and-over within the event
-#'         loop.
+#' @return This function returns only when the user presses \code{ESC} within
+#'         the window, or some other terminating condition occurs.
 #'
 #' @import grDevices
 #' @import graphics
 #'
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = TRUE) {
+run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create a device and capture its device number.
@@ -220,7 +260,12 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
   on.exit(grDevices::dev.off(which = this_dev))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Turn off the displaylist
+  # Turn off the displaylist as this device has no need to capture what
+  # has been drawn to it.
+  # Note: the onIdle() function will paint/repaint this window *EVERY SINGLE
+  # CALL* - this is going to be a lot of events that are cpatured in
+  # a displaylist with no real use. So set displaylist='inhibit' and
+  # never both capturing anything.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   grDevices::dev.control(displaylist = 'inhibit')
 
@@ -233,6 +278,8 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Set up the events on this device
+  #  - the mouse_up, mouse_down, mouse_move and keyboard callbacks are
+  #    not currently customisable
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   grDevices::setGraphicsEventHandlers(
     which         = this_dev,
@@ -245,12 +292,16 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
   )
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Initialise the events to NULL
+  # Initialise the 'event' data to NULL.
+  # this 'event' will be set to not-NULL in any of the mouse/keyboard
+  # callbacks when an event occurs
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   event_env <- grDevices::getGraphicsEventEnv(which = this_dev)
   event_env$event <- NULL
 
-  cat('Starting Game Loop ... ')
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cat('Starting Event Loop ... ')
   grDevices::getGraphicsEvent()
 
   invisible(NULL)
