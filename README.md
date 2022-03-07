@@ -14,7 +14,8 @@ games and other ‘realtime’ animated possiblilities.
 
 ## ToDo before release:
 
--   Add an argument “show_fps” to auto configure the FPS display.
+-   Dynamic plotting example. Fetch and plot in a tight loop?
+-   Link to chipmunk2d and add objects and simulate physics
 
 ## What is an Event Loop?
 
@@ -106,10 +107,15 @@ with a white rectangle rather than call ‘newpage()’
 
 ## Events supported by R graphics devices
 
--   Include a table here comparing the capabilities of quartz(),
-    windows() and x11().
-    -   Rstudio device, quartz, x11, windows
-    -   keyboard, mouse, onIdle
+| device    | type             | mouse down | mouse move | mouse up | keyboard | double buffered | canGenIdle |
+|-----------|------------------|------------|------------|----------|----------|-----------------|------------|
+| quartz    |                  | no         | no         | no       | no       | ???             | no         |
+| windows   |                  | yes        | yes        | yes      | yes      | ???             | no         |
+| RStudioGD |                  | no         | no         | no       | no       | ???             | no         |
+| x11       | type = ‘Xlib’    | yes        | yes        | yes      | yes      | no              | yes        |
+| x11       | type = ‘cairo’   | yes        | yes        | yes      | yes      | no              | yes        |
+| x11       | type = ‘nbcairo’ | yes        | yes        | yes      | yes      | no              | yes        |
+| x11       | type = ‘dbcairo’ | yes        | yes        | yes      | yes      | yes             | yes        |
 
 ## canGenOnIdle is the key
 
@@ -181,6 +187,16 @@ Solution: short bit of C code to help govern the call rate.
 Insert here an animated or multi-page schematic showing the state of the
 system, what happens when a user presses a key
 
+## The event loop mindset
+
+-   Have some global variables to retain state
+-   Recalculate the world
+-   Clear the device
+-   Draw the world
+
+“Fun” effects can be had by not clearing the device every time
+i.e. trippy
+
 ## Examples
 
 Show captured mp4s of these. Too risky to do live!
@@ -202,7 +218,8 @@ Show captured mp4s of these. Too risky to do live!
 
 ## Future in R
 
--   Campaign for `onIdle` to be added to `windows()` device.
+-   Campaign for `onIdle` to be added to `windows()` and `quartz()`
+    devices.
 -   Campaign for keyboard, mouse + idle events for quartz()
     -   quartz may be quite legacy + bomb-proof
     -   is there need for a new device for modern macs?
@@ -237,14 +254,9 @@ latch   <- FALSE
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the operations to be performed each loop
-#
-#  Standard variables defined as part of rendering framework
-#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
-#  - width,height dimensions of window in pixels
-#  - fps          frames per second in last 100 frames
-#  - frame        current frame number (integer sequence starting from 1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-colour_cycle <- function() {
+colour_cycle <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                         fps_taget, dev_width, dev_height, ...) {
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # If there has been an event, then process it
@@ -255,7 +267,7 @@ colour_cycle <- function() {
   if (!is.null(event)) {
     if (event$type == 'mouse_down') {
       latch <<- TRUE
-      msg <- sprintf("(%.1f, %.1f), (%f, %f) %.1f", x, y, width, height, fps)
+      msg <- sprintf("(%.1f, %.1f), (%f, %f) %.1f", mouse_x, mouse_y, dev_width, dev_height, fps_actual)
       cat(msg, "\n")
     } else if (event$type == 'mouse_up') {
       latch <<- FALSE
@@ -267,7 +279,7 @@ colour_cycle <- function() {
   # otherwise set colour to white
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (latch) {
-    col <- colours[[(frame %% 100) + 1L]]
+    col <- colours[[(frame_num %% 100) + 1L]]
   } else {
     col <- 'white'
   }
@@ -277,14 +289,10 @@ colour_cycle <- function() {
   # Draw an FPS counter
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   grid::grid.rect(gp = grid::gpar(fill = col))
-  grid::grid.text(
-    label = paste("FPS: ", round(fps)), x = 0.01, y = 0.01, just = c('left', 'bottom'),
-    gp = grid::gpar(fontfamily = 'mono', cex = 2)
-  )
 }
 
 
-run_loop(colour_cycle, 7, 7)
+run_loop(colour_cycle, 7, 7, show_fps = TRUE)
 ```
 
 ## Example - Raycaster

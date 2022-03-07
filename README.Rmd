@@ -38,7 +38,8 @@ games and other 'realtime' animated possiblilities.
 
 ## ToDo before release:
 
-* Currently empty
+* Dynamic plotting example. Fetch and plot in a tight loop?
+* Link to chipmunk2d and add objects and simulate physics
 
 ## What is an Event Loop?
 
@@ -133,10 +134,15 @@ a white rectangle rather than call 'newpage()'
 
 ## Events supported by R graphics devices
 
-* Include a table here comparing the capabilities of quartz(), windows() and
-  x11(). 
-    * Rstudio device, quartz, x11, windows
-    * keyboard, mouse, onIdle 
+| device    | type             | mouse down | mouse move | mouse up | keyboard | double buffered | canGenIdle |
+|-----------|------------------|------------|------------|----------|----------|-----------------|------------|
+| quartz    |                  | no         | no         | no       | no       | ???             | no         |
+| windows   |                  | yes        | yes        | yes      | yes      | ???             | no         |
+| RStudioGD |                  | no         | no         | no       | no       | ???             | no         |
+| x11       | type = 'Xlib'    | yes        | yes        | yes      | yes      | no              | yes        |
+| x11       | type = 'cairo'   | yes        | yes        | yes      | yes      | no              | yes        |
+| x11       | type = 'nbcairo' | yes        | yes        | yes      | yes      | no              | yes        |
+| x11       | type = 'dbcairo' | yes        | yes        | yes      | yes      | yes             | yes        |
 
 
 ## canGenOnIdle is the key
@@ -210,6 +216,16 @@ Solution: short bit of C code to help govern the call rate.
 Insert here an animated or multi-page schematic showing the state of the system,
 what happens when a user presses a key
 
+
+## The event loop mindset
+
+* Have some global variables to retain state
+* Recalculate the world
+* Clear the device
+* Draw the world
+
+"Fun" effects can be had by not clearing the device every time i.e. trippy
+
 ## Examples 
 
 Show captured mp4s of these.  Too risky to do live!
@@ -233,7 +249,7 @@ Show captured mp4s of these.  Too risky to do live!
 
 ## Future in R
 
-* Campaign for `onIdle` to be added to `windows()` device.
+* Campaign for `onIdle` to be added to `windows()` and `quartz()` devices.
 * Campaign for keyboard, mouse + idle events for quartz()
     * quartz may be quite legacy + bomb-proof
     * is there need for a new device for modern macs?
