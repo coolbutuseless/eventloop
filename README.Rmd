@@ -189,6 +189,8 @@ Solution: short bit of C code to help govern the call rate.
 
 ## Global State
 
+* Set things in the parent environment with "<<-"
+    * Usually a bit of code smell!
 * The graphics device is a dumb canvas that gets cleared and drawn every frame.
 * R functions don't have any idea of C's static variables
 * For user functions, store global variables in the outer code.
@@ -196,6 +198,12 @@ Solution: short bit of C code to help govern the call rate.
   prior to each call.
     * Probably a better way to do this sanely, but it works OK for now  (This 
       was almost the title for this talk)
+
+## Global State (Nicer)
+
+* A nicer way of managing state might be to use environments or an R6
+  object
+* Not attempted here.
 
 
 ## Put it all together
