@@ -1,0 +1,51 @@
+---
+title: "Realtime Plot Updates"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Realtime Plot Updates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(grid)
+library(eventloop)
+```
+
+
+
+
+```{r eval = FALSE}
+ 
+N      <- 50
+state  <- rep(0.5, N)
+alpha  <- 0.05
+
+monitor_status <- function(...) {
+  
+  last_state <- state[N]
+  state <<- c(
+    state[2:N],
+    alpha * runif(1) + (1 - alpha) * last_state
+  )
+  
+  grid.rect(gp = gpar(fill = 'white'))
+  
+  grid.lines(
+    x = seq.int(0, 1, length.out = N),
+    y = state
+  )
+  
+  
+}
+
+run_loop(monitor_status, show_fps = TRUE)
+```
+
