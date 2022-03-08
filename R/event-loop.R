@@ -118,6 +118,8 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
   height     <- graphics::grconvertY(0, 'ndc', 'device')
   frame_num  <- 0L
 
+  message("Width: ", width, "  Height: ", height)
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Make extra, extra sure that 'fps_target' is a numeric, as this is
   # used in 'fps_governor' and treated as if it *MUST* be numeric or

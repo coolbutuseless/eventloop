@@ -41,6 +41,7 @@ games and other 'realtime' animated possiblilities.
 * Dynamic plotting example. Fetch and plot in a tight loop?
 * Link to chipmunk2d and add objects and simulate physics
 
+
 ## What is an Event Loop?
 
 An event loop (or 'game loop', or 'interactive loop') is a programming pattern
@@ -58,6 +59,20 @@ When used in games, the game loop updates the world, moves spaceships, spawns
 greeblies.  When the user gives input (e.g. pressing the 'jump' button), the
 system handles that user input - while also taking time to keep updating the
 greeblies and spaceshipts etc.
+
+## Contrast this with a purely reactive system
+
+* System waits for input
+* Reacts to button press
+* Return to step 1
+
+## Concept of a "world state" that gets updated every tick of the clock
+
+Gigantic clockwork machine.
+
+User controls one tiny bit of the input (even if it's only to hit ESC to 
+terminate the world)
+
 
 ## Where might you witness a game loop?
 
