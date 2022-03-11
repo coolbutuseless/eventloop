@@ -14,5 +14,11 @@ Suggests:
     knitr,
     rmarkdown,
     grid,
-    viridisLite
+    viridisLite,
+    beepr,
+    chipmunkbasic,
+    chipmunkcore
 VignetteBuilder: knitr
+Remotes:
+    coolbutuseless/chipmunkbasic
+    coolbutuseless/chipmunkcore

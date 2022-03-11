@@ -244,6 +244,14 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'        that even though the user supplied function might be called at a very
 #'        high rate, the actual screen update rate may be much much lower.
 #' @param show_fps show the fps. default: FALSE
+#' @param double_buffer use a double buffered device? Default: TRUE.  A
+#'        double buffered device is essential if you are updating the display
+#'        every frame e.g. a game of SuperMario.   For more static games
+#'        e.g Chess, there's no need to double buffer as you are only updating
+#'        the game when user events occur (like moving a chess piece).  Double
+#'        buffered devices avoid "screen tearing" when rendering, but because
+#'        of the way R handles the dev.hold/dev.flush operations, the mouse
+#'        will flicker between a normal pointer and a busy pointer.
 #'
 #' @return This function returns only when the user presses \code{ESC} within
 #'         the window, or some other terminating condition occurs.
