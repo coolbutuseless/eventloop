@@ -270,13 +270,13 @@ Show captured mp4s of these.  Too risky to do live!
   return to the high-speed state.
 
 
-## Future in R
+## Future for interactive apps in R
 
 * Campaign for `onIdle` to be added to `windows()` and `quartz()` devices.
 * Campaign for keyboard, mouse + idle events for quartz()
     * quartz may be quite legacy + bomb-proof
     * is there need for a new device for modern macs?
-
+* Remove "switch to busy pointer" when doing double buffering hold/flush in x11()
 
 
 ## Installation

@@ -26,7 +26,7 @@ runs <- expand.grid(b, b, b, b, b, b, b, b)
 
 valid <- function(vec) {
   all(rle(vec)$lengths < 3) &&
-  sum(vec == 0L) == 4L
+    sum(vec == 0L) == 4L
 }
 
 
@@ -34,7 +34,7 @@ good <- apply(runs, 1, valid)
 runs <- apply(runs[good,], 1, unname, simplify = FALSE)
 runs <- unname(runs)
 
-set.seed(1)
+# set.seed(1)
 runs <- sample(runs)
 ```
 
@@ -56,7 +56,7 @@ is_ok <- function(board) {
 }
 
 
-create_board <- function(board, row) {
+create_board <- function(board, row, avail) {
   
   # print(board)
   # readline("hit enter....")
@@ -69,11 +69,12 @@ create_board <- function(board, row) {
     }
   }
   
-  for (run in runs) {
+  for (i in seq_along(avail)) {
+    run  <- avail[[i]]
     test <- board
     test[row,] <- run
     if (is_ok(test)) {
-      res <- create_board(test, row + 1L)
+      res <- create_board(test, row + 1L, avail[-i])
       if (!is.null(res)) {
         return(res)
       }
@@ -86,7 +87,7 @@ create_board <- function(board, row) {
 
 board <- matrix(NA_integer_, N, N)
 
-board <- create_board(board, 1)
+board <- create_board(board, 1, runs)
 ```
 
 
@@ -194,9 +195,16 @@ update_board <- function(board, row, col, value) {
     return(board)
   }
   
+  value <- as.integer(value == 1)
+  
+  if (identical(board[row, col], value)) {
+    return(board)
+  }
+  
   new_board <- board
-  new_board[row, col] <- as.integer(value == 1)
+  new_board[row, col] <- value
   if (is_valid(new_board)) {
+    history <<- append(history, list(board), after = 0)
     return(new_board)
   } else {
     # Not a valid move. notify user and return
@@ -209,8 +217,10 @@ update_board <- function(board, row, col, value) {
 
 
 ```{r eval = FALSE}
-board <- init_board
-init  <- FALSE
+board   <- init_board
+init    <- FALSE
+solved  <- FALSE
+history <- list()
 
 unruly <- function(event, mouse_x, mouse_y, ...) {
   
@@ -219,22 +229,38 @@ unruly <- function(event, mouse_x, mouse_y, ...) {
     draw_board(board)
   }
   
-  if (!is.null(event) && event$type == 'mouse_down') {
-    col <-     round(mouse_x * 8 + 0.5)
-    row <- 9 - round(mouse_y * 8 + 0.5)
-      cat(row, " ", col, " ", event$button, "\n")
-    if (event$button == 0) {
-      # left mouse
-      board <<- update_board(board, row, col, 0L)
-      draw_board(board)
-    } else if (event$button == 2) {
-      # right mouse
-      board <<- update_board(board, row, col, 1L)
-      draw_board(board)
-    } else if (event$button == 1) {
-      # middle
-      board <<- update_board(board, row, col, NA_integer_)
-      draw_board(board)
+  if (!solved && !is.null(event)) {
+    if (event$type == 'mouse_down') {
+      col <-     round(mouse_x * 8 + 0.5)
+      row <- 9 - round(mouse_y * 8 + 0.5)
+      if (event$button == 0) {
+        # left mouse
+        board <<- update_board(board, row, col, 0L)
+        draw_board(board)
+      } else if (event$button == 2) {
+        # right mouse
+        board <<- update_board(board, row, col, 1L)
+        draw_board(board)
+      } else if (event$button == 1) {
+        # middle
+        board <<- update_board(board, row, col, NA_integer_)
+        draw_board(board)
+      }
+      if (is_solved(board)) {
+        solved <<- TRUE
+        grid.text(label = "Solved!", gp = gpar(col = 'red', cex = 5))
+      }
+    } else if (event$type == 'key_press') {
+      if (event$char %in% c(' ', 'u', 'U')) {
+        if (length(history) > 0) {
+          print("Undo")
+          board <<- history[[1]]
+          history <<- history[-1]
+          draw_board(board)
+        } else {
+          print("Nothing to undo")
+        }
+      }
     }
   }
   
