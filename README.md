@@ -14,8 +14,34 @@ games and other ‘realtime’ animated possiblilities.
 
 ## ToDo before release:
 
--   Dynamic plotting example. Fetch and plot in a tight loop?
--   Link to chipmunk2d and add objects and simulate physics
+-   Tidy Vignettes
+-   Wordle game?
+
+## EventLoop: an interactive graphical programming “system/process/paradigm?” for R
+
+-   R is great
+-   It’s story for interactive applications seems limited er.
+-   Other interactive elements are possible, but you’re handing over
+    your session to javascript and writing html/css/js! e.g. plotly
+-   I was after a fast, reactive graphical interface
+
+Next Slide:
+
+-   Let’s face it, I wanted to write/play games and puzzles in R (like
+    ever computer system I’ve owned)
+
+Cover shot: Creepy computer games, Usborne publishing.
+
+## Game engines in R
+
+-   It is possible:
+    -   someone has a gmae of tictactoe
+    -   I created a text only 2048.
+    -   someone must have created a graphical one?
+
+## What I needed was a system that would make writing these things easy.
+
+I needed an event loop in R
 
 ## What is an Event Loop?
 
@@ -34,6 +60,19 @@ When used in games, the game loop updates the world, moves spaceships,
 spawns greeblies. When the user gives input (e.g. pressing the ‘jump’
 button), the system handles that user input - while also taking time to
 keep updating the greeblies and spaceshipts etc.
+
+## Contrast this with a purely reactive system
+
+-   System waits for input
+-   Reacts to button press
+-   Return to step 1
+
+## Concept of a “world state” that gets updated every tick of the clock
+
+Gigantic clockwork machine.
+
+User controls one tiny bit of the input (even if it’s only to hit ESC to
+terminate the world)
 
 ## Where might you witness a game loop?
 
@@ -159,6 +198,8 @@ Solution: short bit of C code to help govern the call rate.
 
 ## Global State
 
+-   Set things in the parent environment with “\<\<-”
+    -   Usually a bit of code smell!
 -   The graphics device is a dumb canvas that gets cleared and drawn
     every frame.
 -   R functions don’t have any idea of C’s static variables
@@ -167,6 +208,12 @@ Solution: short bit of C code to help govern the call rate.
     environment prior to each call.
     -   Probably a better way to do this sanely, but it works OK for now
         (This was almost the title for this talk)
+
+## Global State (Nicer)
+
+-   A nicer way of managing state might be to use environments or an R6
+    object
+-   Not attempted here.
 
 ## Put it all together
 
@@ -216,13 +263,15 @@ Show captured mp4s of these. Too risky to do live!
     unsure on why this happens, but when it does I need to
     logout-then-login to return to the high-speed state.
 
-## Future in R
+## Future for interactive apps in R
 
 -   Campaign for `onIdle` to be added to `windows()` and `quartz()`
     devices.
 -   Campaign for keyboard, mouse + idle events for quartz()
     -   quartz may be quite legacy + bomb-proof
     -   is there need for a new device for modern macs?
+-   Remove “switch to busy pointer” when doing double buffering
+    hold/flush in x11()
 
 ## Installation
 

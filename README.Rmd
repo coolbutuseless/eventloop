@@ -38,9 +38,36 @@ games and other 'realtime' animated possiblilities.
 
 ## ToDo before release:
 
-* Dynamic plotting example. Fetch and plot in a tight loop?
-* Link to chipmunk2d and add objects and simulate physics
+* Tidy Vignettes
+* Wordle game?
 
+
+## EventLoop: an interactive graphical programming "system/process/paradigm?" for R
+
+* R is great
+* It's story for interactive applications seems limited er.
+* Other interactive elements are possible, but you're handing over your 
+  session to javascript and writing html/css/js! e.g. plotly
+* I was after a fast, reactive graphical interface 
+
+Next Slide:
+
+* Let's face it, I wanted to write/play games and puzzles in R (like
+ever computer system I've owned)
+
+Cover shot: Creepy computer games, Usborne publishing.
+
+
+## Game engines in R
+
+* It is possible:
+    * someone has a gmae of tictactoe
+    * I created a text only 2048.
+    * someone must have created a graphical one?
+
+## What I needed was a system that would make writing these things easy.
+
+I needed an event loop in R
 
 ## What is an Event Loop?
 
