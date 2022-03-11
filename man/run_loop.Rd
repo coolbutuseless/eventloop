@@ -4,7 +4,14 @@
 \alias{run_loop}
 \title{Run the user supplied function as the idle function within the event loop}
 \usage{
-run_loop(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE)
+run_loop(
+  user_func,
+  width = 7,
+  height = 7,
+  fps_target = 30,
+  show_fps = FALSE,
+  double_buffer = TRUE
+)
 }
 \arguments{
 \item{user_func}{user function}

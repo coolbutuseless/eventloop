@@ -110,7 +110,10 @@ onKeybd <- function(char) {
 # This onIdle function prepares variables in the function environment so
 # the user doesn't have to do as much.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
+gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
+                       double_buffer = TRUE) {
+
+  double_buffer <- isTRUE(double_buffer)
 
   x          <- 0.5
   y          <- 0.5
@@ -172,7 +175,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
     # Probably devices where this will help:  x11(type='dbcairo'), quartz()
     #  and windows()
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    grDevices::dev.hold()
+    if (double_buffer) grDevices::dev.hold()
     user_func(
       event      = event_env$event,
       mouse_x    = x,
@@ -216,7 +219,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Flush the drawing commands to the device
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    grDevices::dev.flush()
+    if (double_buffer) grDevices::dev.flush()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Clear the event after each call to the user_func()
@@ -250,13 +253,21 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev) {
 #'
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE) {
+run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE,
+                     double_buffer = TRUE) {
+
+
+  if (double_buffer) {
+    type <- 'dbcairo'
+  } else {
+    type <- 'nbcairo'
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create a device and capture its device number.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   devs1 <- dev.list()
-  grDevices::x11(type = 'dbcairo', width = width, height = height)
+  grDevices::x11(type = type, width = width, height = height)
   devs2 <- dev.list()
   this_dev <- setdiff(devs2, devs1)
   on.exit(grDevices::dev.off(which = this_dev))
@@ -276,7 +287,8 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
   # all the parameters at each call.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   onIdle <- gen_onIdle(user_func, fps_target = fps_target,
-                       show_fps = show_fps, this_dev = this_dev)
+                       show_fps = show_fps, this_dev = this_dev,
+                       double_buffer = double_buffer)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Set up the events on this device

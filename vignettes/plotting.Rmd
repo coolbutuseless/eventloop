@@ -24,28 +24,56 @@ library(eventloop)
 
 ```{r eval = FALSE}
  
-N      <- 50
-state  <- rep(0.5, N)
-alpha  <- 0.05
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Initialise a number of data streams
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N        <- 20
+Nstreams <- 100
+streams  <- lapply(seq(Nstreams), function(x) rep(0.5, N))
+alpha    <- 0.05
+cols     <- rainbow(Nstreams)
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The plotting/behaviour at each call doesn't actually depend on anything
+# the user is doing, so just ignore all arguments
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 monitor_status <- function(...) {
   
-  last_state <- state[N]
-  state <<- c(
-    state[2:N],
-    alpha * runif(1) + (1 - alpha) * last_state
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Update all streams by pulling a new value from the source.
+  # In this simple example, the datasource is just 'runif(1)'
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  streams <<- lapply(
+    streams,
+    function(stream) {
+      c(
+        stream[2:N],
+        alpha * runif(1) + (1 - alpha) * stream[N]
+      )
+    }
   )
+
   
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Clear the screen
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   grid.rect(gp = gpar(fill = 'white'))
   
-  grid.lines(
-    x = seq.int(0, 1, length.out = N),
-    y = state
-  )
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Plot the data streams in different colours
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  for (i in seq_along(streams)) {
+    grid.lines(
+      x = seq.int(0, 1, length.out = N),
+      y = streams[[i]],
+      gp = gpar(col = cols[[i]])
+    )
+  }
   
   
 }
 
-run_loop(monitor_status, show_fps = TRUE)
+run_loop(monitor_status, show_fps = TRUE, fps_target = 30)
 ```
 

@@ -1,0 +1,250 @@
+---
+title: "unruly"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{unruly}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(eventloop)
+```
+
+
+```{r}
+b    <- c(0L, 1L)
+runs <- expand.grid(b, b, b, b, b, b, b, b)
+
+
+valid <- function(vec) {
+  all(rle(vec)$lengths < 3) &&
+  sum(vec == 0L) == 4L
+}
+
+
+good <- apply(runs, 1, valid)
+runs <- apply(runs[good,], 1, unname, simplify = FALSE)
+runs <- unname(runs)
+
+set.seed(1)
+runs <- sample(runs)
+```
+
+
+
+
+```{r}
+N <- 8L
+
+
+is_ok <- function(board) {
+  all(
+    apply(board, 2, function(x) {
+      all(rle(x)$lengths < 3) && 
+        sum(x == 0L, na.rm = TRUE) < 5L && 
+        sum(x == 1L, na.rm = TRUE) < 5L
+    })
+  )
+}
+
+
+create_board <- function(board, row) {
+  
+  # print(board)
+  # readline("hit enter....")
+  
+  if (row > N) {
+    if (is_ok(board)) {
+      return(board)
+    } else {
+      return(NULL)
+    }
+  }
+  
+  for (run in runs) {
+    test <- board
+    test[row,] <- run
+    if (is_ok(test)) {
+      res <- create_board(test, row + 1L)
+      if (!is.null(res)) {
+        return(res)
+      }
+    }
+  }
+  
+  return(NULL)
+}
+
+
+board <- matrix(NA_integer_, N, N)
+
+board <- create_board(board, 1)
+```
+
+
+```{r}
+is_valid <- function(board) {
+  board <- round(board)
+  all(
+    apply(board, 2, function(x) {
+      all(rle(x)$lengths < 3) && 
+        sum(x == 0L, na.rm = TRUE) < 5L && 
+        sum(x == 1L, na.rm = TRUE) < 5L
+    })
+  ) &&
+    all(
+      apply(board, 1, function(x) {
+        all(rle(x)$lengths < 3) && 
+          sum(x == 0L, na.rm = TRUE) < 5L && 
+          sum(x == 1L, na.rm = TRUE) < 5L
+      })
+    )
+}
+
+is_solved <- function(board) {
+  !anyNA(board) && is_valid(board)
+}
+```
+
+
+
+```{r}
+library(grid)
+
+rem <- sample(N*N, 0.6 * N * N)
+init_board <- board
+init_board[rem] <- NA
+
+permanent0 <- arrayInd(which(!is.na(init_board) & init_board == 0), c(8, 8)) 
+permanent1 <- arrayInd(which(!is.na(init_board) & init_board == 1), c(8, 8)) 
+
+# flip y
+permanent0[,1] <- 9 - permanent0[,1]
+permanent1[,1] <- 9 - permanent1[,1]
+
+permanent0 <- (permanent0 - 0.5) / 8
+permanent1 <- (permanent1 - 0.5) / 8
+
+```
+
+
+```{r}
+
+# Prep data for the gridlines
+ii  <- seq.int(0, 1, length.out = 9)
+c1 <- rep(ii, each = 2)
+c2 <- rep(c(0, 1), times = 9)
+idx <- rep(seq(1:9), each = 2)
+
+
+```
+
+
+
+```{r}
+
+draw_board <- function(board) {
+  
+  # Draw background base board
+  grid.rect(gp = gpar(fill = 'grey50', col = 'black', lwd = 5), 
+            width = 1, height = 1, default.units = 'snpc')
+  
+  # Draw the tiles so far
+  grid.raster(board, interpolate = FALSE)
+  
+  # Draw the permanent markers
+  grid.rect(
+    x = permanent0[,2],
+    y = permanent0[,1],
+    width  = 0.125 / 4,
+    height = 0.125 / 4,
+    default.units = 'snpc',
+    gp = gpar(col = 'grey10', fill = NA, lwd = 4)
+  )
+  grid.rect(
+    x = permanent1[,2],
+    y = permanent1[,1],
+    width  = 0.125 / 4,
+    height = 0.125 / 4,
+    default.units = 'snpc',
+    gp = gpar(col = 'grey90', fill = NA, lwd = 4)
+  )
+  
+  
+  # Draw Grid
+  grid.polyline(c1, c2, id = idx)
+  grid.polyline(c2, c1, id = idx)
+  
+}
+
+
+update_board <- function(board, row, col, value) {
+  
+  # Don't let user change initial pieces
+  if (!is.na(init_board[row, col])) {
+    beepr::beep(1)
+    return(board)
+  }
+  
+  new_board <- board
+  new_board[row, col] <- as.integer(value == 1)
+  if (is_valid(new_board)) {
+    return(new_board)
+  } else {
+    # Not a valid move. notify user and return
+    beepr::beep(10)
+    return(board)
+  }
+  
+}
+```
+
+
+```{r eval = FALSE}
+board <- init_board
+init  <- FALSE
+
+unruly <- function(event, mouse_x, mouse_y, ...) {
+  
+  if (!init) {
+    init <<- TRUE
+    draw_board(board)
+  }
+  
+  if (!is.null(event) && event$type == 'mouse_down') {
+    col <-     round(mouse_x * 8 + 0.5)
+    row <- 9 - round(mouse_y * 8 + 0.5)
+      cat(row, " ", col, " ", event$button, "\n")
+    if (event$button == 0) {
+      # left mouse
+      board <<- update_board(board, row, col, 0L)
+      draw_board(board)
+    } else if (event$button == 2) {
+      # right mouse
+      board <<- update_board(board, row, col, 1L)
+      draw_board(board)
+    } else if (event$button == 1) {
+      # middle
+      board <<- update_board(board, row, col, NA_integer_)
+      draw_board(board)
+    }
+  }
+  
+}
+
+
+eventloop::run_loop(unruly, fps_target = 60, double_buffer = FALSE)
+
+
+
+```
+
+
