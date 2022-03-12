@@ -2,15 +2,24 @@
 % Please edit documentation in R/utils-governor.R
 \name{fps_governor}
 \alias{fps_governor}
+\alias{fps_governor_new}
+\alias{init_fps_governor}
 \title{Governor for frame rate}
 \usage{
 fps_governor(fps)
+
+fps_governor_new(fps, fs)
+
+init_fps_governor()
 }
 \arguments{
-\item{fps}{target frames per second}
+\item{fps}{target frames per second i.e. the desired frrame rate}
+
+\item{fs}{an FPS Structure storing global information for the FPS governor.
+Create this object initially with \code{fs = init_fps_governor()}}
 }
 \value{
-actual fps calculated over last 10 frames
+The current actual framerate
 }
 \description{
 Given a target FPS, this function will insert pauses to ensure it can

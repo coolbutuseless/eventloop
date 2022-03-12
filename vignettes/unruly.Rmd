@@ -252,7 +252,7 @@ unruly <- function(event, mouse_x, mouse_y, ...) {
       }
     } else if (event$type == 'key_press') {
       if (event$char %in% c(' ', 'u', 'U')) {
-        if (length(history) > 0) {
+        if (length(history) > 0) { 
           print("Undo")
           board <<- history[[1]]
           history <<- history[-1]
