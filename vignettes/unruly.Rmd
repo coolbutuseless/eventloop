@@ -1,8 +1,8 @@
 ---
-title: "unruly"
+title: "Unruly Puzzle"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{unruly}
+  %\VignetteIndexEntry{Unruly Puzzle}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,39 +12,77 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+set.seed(1)
 ```
 
 ```{r setup}
+library(grid)
 library(eventloop)
+library(ggplot2)
 ```
 
 
+
+## What patterns are possible in a row?
+
+These rows of allowable patterns will be the core element used to generate
+a random valid board state.
+
 ```{r}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Generate a data.frame of all possible 0/1 values along a row-of-8 values
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 b    <- c(0L, 1L)
 runs <- expand.grid(b, b, b, b, b, b, b, b)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function to determine if a vector of 8 integers is valid:
+#  - cannot be more than 2 values of the same kind in a row
+#  - must be four 0s and four 1s in each row
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 valid <- function(vec) {
   all(rle(vec)$lengths < 3) &&
     sum(vec == 0L) == 4L
 }
 
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# filter to keep only the valid row patterns for this puzzle
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 good <- apply(runs, 1, valid)
 runs <- apply(runs[good,], 1, unname, simplify = FALSE)
 runs <- unname(runs)
-
-# set.seed(1)
 runs <- sample(runs)
 ```
 
 
+```{r echo = FALSE}
 
+mat <- do.call(rbind, runs[1:4])
+id0 <- as.data.frame(arrayInd(which(mat == 0), dim(mat)))
+id1 <- as.data.frame(arrayInd(which(mat == 1), dim(mat)))
+
+id0$V1 <- id0$V1 * 1.2
+id1$V1 <- id1$V1 * 1.2
+
+ggplot() + 
+  geom_tile(data = id0, aes(V2, V1), fill = 'black', width = 0.95, height = 0.95) + 
+  geom_tile(data = id1, aes(V2, V1), fill = 'white', width = 0.95, height = 0.95) + 
+  theme_void() +
+  theme(plot.background = element_rect(fill = 'grey50')) + 
+  coord_equal() + 
+  labs(title = "4 of the 34 valid row tilings")
+```
+
+
+## Generate a random board
 
 ```{r}
 N <- 8L
 
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Check a board is valid
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 is_ok <- function(board) {
   all(
     apply(board, 2, function(x) {
@@ -56,11 +94,16 @@ is_ok <- function(board) {
 }
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Board generation via recurstion-plus-backtracking
+# 
+# @param board 8x8 matrix of values so var.  Board is NA where values have
+#        not yet been set
+# @param row which row index are we trying to add to the board?
+# @param avail what valid row runs are left?  In this vignette I'm taking 
+#        some shortcuts on board generation for the sake of brevity.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 create_board <- function(board, row, avail) {
-  
-  # print(board)
-  # readline("hit enter....")
-  
   if (row > N) {
     if (is_ok(board)) {
       return(board)
@@ -85,13 +128,20 @@ create_board <- function(board, row, avail) {
 }
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Generate an empty board and then create a valid board within it.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 board <- matrix(NA_integer_, N, N)
-
 board <- create_board(board, 1, runs)
 ```
 
 
 ```{r}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# This is a fully featured "Board is in a valid state" check.  
+# This check allows for NA elements where the board state has not yet been
+# decided
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 is_valid <- function(board) {
   board <- round(board)
   all(
@@ -110,6 +160,10 @@ is_valid <- function(board) {
     )
 }
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# If the board is "full" (i.e. there are no NAs), and the board state is 
+# valid, then the board has been solved!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 is_solved <- function(board) {
   !anyNA(board) && is_valid(board)
 }
@@ -118,12 +172,18 @@ is_solved <- function(board) {
 
 
 ```{r}
-library(grid)
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Take the known solution and blank 08t 60% of the board
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 rem <- sample(N*N, 0.6 * N * N)
 init_board <- board
 init_board[rem] <- NA
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The white/black tiles which start on the board are considered unchangeable.
+# Create a plotting overlay so the user can tell these initial tiles 
+# from other tiles.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 permanent0 <- arrayInd(which(!is.na(init_board) & init_board == 0), c(8, 8)) 
 permanent1 <- arrayInd(which(!is.na(init_board) & init_board == 1), c(8, 8)) 
 
@@ -134,24 +194,23 @@ permanent1[,1] <- 9 - permanent1[,1]
 permanent0 <- (permanent0 - 0.5) / 8
 permanent1 <- (permanent1 - 0.5) / 8
 
-```
-
-
-```{r}
-
-# Prep data for the gridlines
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Prep data for the gridlines the help define the board
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ii  <- seq.int(0, 1, length.out = 9)
 c1 <- rep(ii, each = 2)
 c2 <- rep(c(0, 1), times = 9)
 idx <- rep(seq(1:9), each = 2)
-
-
 ```
 
 
 
 ```{r}
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Draw a game board
+#   'board' must be an 8x8 integer matrix containing only 0L/1L/NA_integer
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 draw_board <- function(board) {
   
   # Draw background base board
@@ -183,10 +242,17 @@ draw_board <- function(board) {
   # Draw Grid
   grid.polyline(c1, c2, id = idx)
   grid.polyline(c2, c1, id = idx)
-  
 }
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Update the game board by attepming to set the location(row, col) to 'value'
+#  - if this was a tile in the initial board, it should be considered permanent,
+#    so just play a sound and don't actually change teh board.
+#  - if the board value was already set to the value specified, do nothing.
+#  - if setting the (row,col) to the given value results in a valid board, 
+#    then add the current board to the history (so we can undo later if requested)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 update_board <- function(board, row, col, value) {
   
   # Don't let user change initial pieces
@@ -217,18 +283,33 @@ update_board <- function(board, row, col, value) {
 
 
 ```{r eval = FALSE}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Global state for the eventloop
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 board   <- init_board
-init    <- FALSE
-solved  <- FALSE
-history <- list()
+init    <- FALSE       # Has the puzzle been started?
+solved  <- FALSE       # Has the puzzle been solved?
+history <- list()      # Use a simple LIFO queu
+
 
 unruly <- function(event, mouse_x, mouse_y, ...) {
-  
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # If this is  first frame then the board *MUST* be drawn
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
   if (!init) {
     init <<- TRUE
     draw_board(board)
   }
   
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  # If the puzzle isn't already solved 
+  #  - left mouse button = set to to 'black'
+  #  - right mouse button = set tile to 'white'
+  #  - middle mouse button = clear tile
+  #  - 'SPACE', 'u' or 'U' will walk backwards through the history of all
+  #    moves made so far
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
   if (!solved && !is.null(event)) {
     if (event$type == 'mouse_down') {
       col <-     round(mouse_x * 8 + 0.5)
@@ -253,12 +334,12 @@ unruly <- function(event, mouse_x, mouse_y, ...) {
     } else if (event$type == 'key_press') {
       if (event$char %in% c(' ', 'u', 'U')) {
         if (length(history) > 0) { 
-          print("Undo")
+          # Pull out the last pushed board from LIFO queue
           board <<- history[[1]]
           history <<- history[-1]
           draw_board(board)
         } else {
-          print("Nothing to undo")
+          # print("Nothing to undo")
         }
       }
     }
