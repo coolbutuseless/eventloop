@@ -77,3 +77,9 @@ monitor_status <- function(...) {
 run_loop(monitor_status, show_fps = TRUE, fps_target = 30)
 ```
 
+ <video controls>
+  <source src="images/plotting.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+
+

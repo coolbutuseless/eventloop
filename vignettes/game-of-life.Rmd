@@ -14,27 +14,103 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Introduction
+
+[Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)
+is a cellular automaton where the evolution of the grid state is determined
+entirely by the initially state of the grid.
+
+If we consider the grid to be black pixels on a white background, at each
+time step the boart updates by following these rules:
+
+1. Any live cell with two or three live neighbours survives.
+2. Any dead cell with three live neighbours becomes a live cell.
+3. All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+
+## General implementation notes for R
+
+A naive approach to implemention of this game would be to have nested `for`
+loops and iterate over every cell.  At every cell then, interrogate all the
+neighbours to decide on what the cell should do for the next time step.
+
+Nested `for` loops in R are too slow to produce a smoothly animating result.
+Instead, a matrix-based approach is taken where the board state is
+shifted in the 8 directions, and then these shifted boards are stacked
+and summed efficiently to determine the next board state.
+
+## Rendering in the Event Loop
+
+At every frame, the board is cleared and the entire board state is drawn
+from scratch using `grid::grid.raster()` to plot a matrix to the graphics
+output device.
+
+Also at every frame, a new board state is calculated.  If a `target_fps` is
+not set, and the simulation allowed to run as fast as possible, then the 
+board is updated over 100 times per second.
+
+## Interactivity
+
+This application watches for a mouse click by the user.  When the mouse
+is held down, the board updates are paused, and the pixels nearest the 
+mouse position are set to "active".  
+
+
+# Game of Life in R
+
 ```{r setup, eval = FALSE}
 library(eventloop)
 library(grid)
 
-# Board
-N <- 100
-g <- matrix(sample(c(0L, 1L), N*N, replace = TRUE), N, N)
-
-# standard blank vectors I'll need
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Standard blank vectors needed when shifting the current board in 8 
+# different directions
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 blankN   <- rep(0L, N   )
 blankNm1 <- rep(0L, N-1L)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Global State
+#  - 'N'     size of board
+#  - 'g'     the game board is an NxN integer matrix of 0/1 values
+#  - 'latch' is set to TRUE whenever the user presses-and-holds a mouse button
+#            and then set to FALSE when the mouse button is released
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N <- 100
+g <- matrix(sample(c(0L, 1L), N*N, replace = TRUE), N, N)
 latch <- FALSE
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Define the operations to be performed each loop
+# The gave of life
+#
+# @param event The event from the graphics device. Is NULL when no event
+#        occurred.  Otherwise has `type` element set to:
+#        `event$type = 'mouse_down'` 
+#               - an event in which a mouse button was pressed
+#               - `event$button` gives the index of the button
+#        `event$type = 'mouse_up'`   
+#               - a mouse button was released
+#        `event$type = 'key_press'`  
+#               - a key was pressed
+#               - `event$char` holds the character as string
+#               - `event$int` holds the integer representation
+#
+# @param mouse_x,mouse_y the current positino of the mouse in 'npc' coordinates
+#        which span the range [0,1]
+# @param frame_num Integer value starting with 1 and incrementing for every
+#        frame rendered
+# @param fps_actual the current actual framerate
+# @param fps_target the target framerate set by the user
+# @param dev_width,dev_height size of the device in pixels
+# @param ... any other parameters ignored
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 game_of_life <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
-                         fps_taget, dev_width, dev_height, ...) {
+                         fps_target, dev_width, dev_height, ...) {
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Set the 'latch' variable depending on whether or not a button is pressed
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (!is.null(event)) {
     if (event$type == 'mouse_down') {
       latch <<- TRUE
@@ -43,6 +119,10 @@ game_of_life <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
     }
   }
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # if 'latch' is TRUE, then set the pixel under the mouse to 'black',
+  # Otherwise update the board 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (latch) {
     g[as.integer((1 - mouse_y) * (N-1) + 1), as.integer(mouse_x * (N-1) + 1)] <<- 1L
   } else {
@@ -65,19 +145,19 @@ game_of_life <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
     
   }
   
-  
-  # Clear the screen
-  grid::grid.rect(gp = grid::gpar(fill = 'black'))
-
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Clear the screen (Note: grid.rect() is faster than a grid.newpage())
   # Draw the GameOfLife grid
-  grid.raster(1L - g, interpolate = FALSE)
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  grid::grid.rect(gp = grid::gpar(fill = 'black'))
+  grid::grid.raster(1L - g, interpolate = FALSE)
 }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run the loop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop(game_of_life, 7, 7, fps_target = 10, show_fps = TRUE)
+run_loop(game_of_life, 7, 7, fps_target = 30, show_fps = TRUE)
 ```
 
 

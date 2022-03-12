@@ -268,9 +268,12 @@ unruly <- function(event, mouse_x, mouse_y, ...) {
 
 
 eventloop::run_loop(unruly, fps_target = 60, double_buffer = FALSE)
-
-
-
 ```
+
+
+ <video controls>
+  <source src="images/unruly.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
 
 
