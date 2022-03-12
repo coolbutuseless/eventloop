@@ -289,6 +289,14 @@ Show captured mp4s of these.  Too risky to do live!
 * raycaster engine
 
 
+## Tips
+
+* `ggplot2` is a great package, but because of the all the layout and scaling that 
+   goes into one of its great-looking plots, it's not speedy.
+* Instead just do raw `grid::grid.points()` etc calls.
+* Avoid `grid.newpage()`it does a lot more than clear the page.
+    * instead just draw a giant rectangle to cover the screen.
+
 
 ## Issues
 
@@ -298,7 +306,7 @@ Show captured mp4s of these.  Too risky to do live!
 * Sometimes the device gets locked in a slow state on macOS.  I am unsure on 
   why this happens, but when it does I need to logout-then-login to 
   return to the high-speed state.
-
+* Not tested with non-square device sizes
 
 ## Future for interactive apps in R
 
