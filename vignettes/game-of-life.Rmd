@@ -77,7 +77,7 @@ game_of_life <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run the loop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop(game_of_life, 7, 7, fps_target = 30, show_fps = TRUE)
+run_loop(game_of_life, 7, 7, fps_target = 10, show_fps = TRUE)
 ```
 
 

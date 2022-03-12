@@ -169,7 +169,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
     # Try and maintain the 'fps_target' set by the user.
     # The return value is the 'actual_fps' that's currently happening
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    fps_actual <- fps_governor_new(fps_target, fs)
+    fps_actual <- fps_governor(fps_target, fs)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # To prevent tearing, call a 'dev.hold()' first, then call the

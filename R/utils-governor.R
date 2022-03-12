@@ -4,8 +4,6 @@
 #' Governor for frame rate
 #'
 #' Given a target FPS, this function will insert pauses to ensure it can
-#' be called no more than this number of times per second (give or take a little
-#' bit)
 #'
 #' @param fps target frames per second i.e. the desired frrame rate
 #' @param fs an FPS Structure storing global information for the FPS governor.
@@ -13,16 +11,8 @@
 #' @return The current actual framerate
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-fps_governor <- function(fps) {
-  .Call(fps_governor_, fps)
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' @rdname fps_governor
-#' @export
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-fps_governor_new <- function(fps, fs) {
-  .Call(fps_governor_new_, fps, fs)
+fps_governor <- function(fps, fs) {
+  .Call(fps_governor_, fps, fs)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,7 +30,7 @@ if (FALSE) {
   system.time({
     fs <- init_fps_governor()
     for (i in seq(300)) {
-      fps_governor_new(60, fs)
+      fps_governor(60, fs)
     }
   })
 

@@ -2,13 +2,10 @@
 % Please edit documentation in R/utils-governor.R
 \name{fps_governor}
 \alias{fps_governor}
-\alias{fps_governor_new}
 \alias{init_fps_governor}
 \title{Governor for frame rate}
 \usage{
-fps_governor(fps)
-
-fps_governor_new(fps, fs)
+fps_governor(fps, fs)
 
 init_fps_governor()
 }
@@ -23,6 +20,4 @@ The current actual framerate
 }
 \description{
 Given a target FPS, this function will insert pauses to ensure it can
-be called no more than this number of times per second (give or take a little
-bit)
 }
