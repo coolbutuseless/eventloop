@@ -39,7 +39,10 @@ games and other 'realtime' animated possiblilities.
 ## ToDo before release:
 
 * Tidy Vignettes
-* Wordle game?
+    * Consistent documentation across all examples. i.e. same headings
+* New vignettes:
+    * Using an R6 object to manage the state rathen than having global vars
+    * Wordle
 
 
 ## EventLoop: an interactive graphical programming "system/process/paradigm?" for R
