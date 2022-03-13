@@ -1,0 +1,142 @@
+---
+title: "Spirograph"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Spirograph}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## A Four-fold symmetric spirograph drawing application
+
+* Left mouse is used to active drawing mode
+* Pressing SPACE will clear the canvas
+* Adjust drawing mode with PLUS and MINUS for size, 0-9 for colour and 
+  'm' for drawing object
+* extra logic is used to store prior coordinates in the global state so 
+  that the output is a continuous line when drawing
+* drawing elements are then repeated in 4 quadrants
+
+## Event Loop Considerations
+
+
+
+```{r setup, eval=FALSE}
+library(grid)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set up the global variables which store the state of the world
+#  'drawing'  Currently drawing?
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+drawing  <- FALSE
+mode     <- 1L
+mode_max <- 1L
+last_x   <- NA
+last_y   <- NA
+size     <- 2
+colours  <- c('black', 'darkgreen', 'darkblue', 'lightblue', 'brown2', 
+              'red', 'hotpink', 'darkgray', 'gold', 'white')
+colour   <- colours[[1]]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The main 'draw' function - his function is called repeatedly within the eventloop.
+#
+# If 'event' is not NULL, then it means that the user interacted with the
+# display.  The following events have an effect on the canvas:
+#  - hold mouse to set drawing mode
+#  - releasing the mouse button stops drawing mode
+#  - pressing SPACE clears the canvas
+#  - +/- changs the size of the object drawn
+#  - 'm' changes the type ofelement drawn
+#  - 0-9 changes the drawing colour
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw <- function(event, mouse_x, mouse_y, ...) {
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Process events
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.null(event)) {
+    if (event$type == 'mouse_down') {
+      drawing <<- TRUE
+    } else if (event$type == 'mouse_up') {
+      drawing <<- FALSE
+      last_x <<- NA
+      last_y <<- NA
+    } else if (event$type == 'key_press') {
+      if (event$char == ' ') {
+        grid::grid.rect(gp = gpar(col=NA, fill='white')) # clear screen
+        last_x <<- NA
+        last_y <<- NA
+      } else if (event$char == 'm') {
+        mode <<- (mode + 1L) %% (mode_max + 1L)
+        cat("Mode: ", mode, "\n")
+      } else if (event$char == '+') {
+        size <<- size + 2
+        cat("Size: ", size, "\n")
+      } else if (event$char == '-') {
+        size <<- size - 2
+        if (size < 2) {
+          size <<- 2
+        }
+        cat("Size: ", size, "\n")
+      } else if (event$char %in% 0:9) {
+        colour <<- colours[[as.integer(event$char) + 1L]]
+        cat("Colour: ", colour, "\n")
+      }
+    }
+  }
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # If drawing mode is active, draw from the last point to this point.
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (drawing) {
+    if (!is.na(last_x)){
+      x <- c(last_x, mouse_x)
+      y <- c(last_y, mouse_y)
+      
+      mx = c(x, 1-x, 1-x,   x)
+      my = c(y,   y, 1-y, 1-y)
+      
+      if (mode == 0) {
+        grid::grid.polyline(
+          x = c(x, 1-x, 1-x,   x),
+          y = c(y,   y, 1-y, 1-y),
+          id.lengths = c(2, 2, 2, 2),
+          gp = gpar(
+            lwd = size,
+            col = colour
+          )
+        )
+      } else if (mode == 1) {
+        grid::grid.circle(
+          x = mx,
+          y = my,
+          r = unit(size, 'pt'),
+          gp = gpar(col = NA, fill = colour)
+        )
+      }
+    }
+    
+    last_x <<- mouse_x
+    last_y <<- mouse_y
+  }
+  
+  
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop.  
+# Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(draw, double_buffer = FALSE)
+```
+

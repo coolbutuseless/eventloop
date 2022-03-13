@@ -21,11 +21,40 @@ library(eventloop)
 library(ggplot2)
 ```
 
+## Introduction
+
+**Unruly** is a puzzle from [Simon Tatham's Puzzle Collection](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/unruly.html).
+
+In a square grid of pixels coloured only white or black, fill in any empty 
+spaces with a tile such that:
+
+* no three consecutive squares, horizontally or vertically, are the same colour
+* each row and column contains the same number of black and white squares
+
+Below is an image of the initial puzzle state for an 8x8 game (left), and
+the solution to this puzzle (right).
+
+<div>
+  <div style="width:45%; float:left;">
+  <img src="images/unruly-init.png" />
+  </div>
+  <div style="width:45%; float:right;">
+  <img src="images/unruly-solved.png" />
+  </div>
+</div>
+
+<div style="clear:both;" />
+
 
 
 ## What patterns are possible in a row?
 
-These rows of allowable patterns will be the core element used to generate
+Given the constraints, there are a limited number of 8-tile rows that
+are valid.
+
+Here I will generate all valid patterns for a sequence of 8 tiles.
+
+These rows of allowable patterns will be the core element used to build
 a random valid board state.
 
 ```{r}
@@ -76,6 +105,14 @@ ggplot() +
 
 
 ## Generate a random board
+
+Using recursion-with-backtracking, I build a random board by adding one of the
+valid rows to a board and checking that the puzzle is still in a globally 
+valid state.
+
+If ever the addition of a new row of tiles results in an invalid condition,
+remove that row and try a different one from the set of 34 valid rows.
+
 
 ```{r}
 N <- 8L
@@ -134,6 +171,19 @@ create_board <- function(board, row, avail) {
 board <- matrix(NA_integer_, N, N)
 board <- create_board(board, 1, runs)
 ```
+
+#### The randomly generated board
+
+```{r echo=FALSE}
+board
+grid.raster(board, interpolate = FALSE)
+```
+
+
+## Define the game
+
+* `is_valid()` checks a board is a valid state
+* `is_solved()` checks the board is in a valid state and the board is complete
 
 
 ```{r}
@@ -282,6 +332,22 @@ update_board <- function(board, row, col, value) {
 ```
 
 
+## Play the Game
+
+* Click left mouse to add a black tile
+* Click right mouse to add a white tile
+* Click the middle mouse button to clear the tile space
+* Tiles which are draw with an interior square cannot be changed
+* I use [{beepr}](https://cran.r-project.org/package=beepr) to play audio when the user attempts an invalid move
+
+Implementation notes:
+
+Because this is a naive implementation of the puzzle:
+
+* There can be multiple valid solutions to each puzzle.
+* You may have to guess tiles i.e. there will be situations where there the 
+  rules of the puzzle do not point to a valid move.  In such cases, just guess!
+
 ```{r eval = FALSE}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global state for the eventloop
@@ -289,7 +355,7 @@ update_board <- function(board, row, col, value) {
 board   <- init_board
 init    <- FALSE       # Has the puzzle been started?
 solved  <- FALSE       # Has the puzzle been solved?
-history <- list()      # Use a simple LIFO queu
+history <- list()      # Use a simple LIFO queue so the user has unlimited UNDO
 
 
 unruly <- function(event, mouse_x, mouse_y, ...) {
@@ -348,7 +414,7 @@ unruly <- function(event, mouse_x, mouse_y, ...) {
 }
 
 
-eventloop::run_loop(unruly, fps_target = 60, double_buffer = FALSE)
+eventloop::run_loop(unruly, double_buffer = FALSE)
 ```
 
 

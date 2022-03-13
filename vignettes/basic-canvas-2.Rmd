@@ -1,0 +1,92 @@
+---
+title: "Basic Canvas 2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Basic Canvas 2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## A simple drawing canvas
+
+* Left mouse is used to active drawing mode
+* Pressing SPACE will clear the canvas
+
+
+## Event Loop Considerations
+
+
+
+```{r setup, eval=FALSE}
+library(grid)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set up the global variables which store the state of the world
+#  'drawing'  Currently drawing?
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+drawing <- FALSE
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The main 'draw' function - his function is called repeatedly within the eventloop.
+#
+# If 'event' is not NULL, then it means that the user interacted with the
+# display.  The following events have an effect on the canvas:
+#  - hold mouse to set drawing mode
+#  - releasing the mouse button stops drawing mode
+#  - pressing SPACE clears the canvas
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw <- function(event, mouse_x, mouse_y, ...) {
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Process events
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.null(event)) {
+    if (event$type == 'mouse_down') {
+      drawing <<- TRUE
+    } else if (event$type == 'mouse_up') {
+      drawing <<- FALSE
+    } else if (event$type == 'key_press' && event$char == ' ') {
+      grid::grid.rect(gp = gpar(col=NA, fill='white')) # clear screen
+    }
+  }
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # If the pen is currently active, then draw on the canvas and display
+  # the latest version.
+  # Note that graphics coordiates are from bottom-left of screen, while
+  # matrix coordinates are from top-left.  So the y-axis must be inverted
+  # to set a matrix location from a mouse position
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (drawing) {
+    grid::grid.circle(
+      x = mouse_x, 
+      y = mouse_y,
+      r = unit(5, 'pt'),
+      gp = gpar(fill='black')
+    )
+  }
+  
+  
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop.  
+# Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(draw, double_buffer = FALSE)
+```
+
+<video controls>
+  <source src="images/basic-canvas-rough.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+

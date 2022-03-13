@@ -1,0 +1,98 @@
+---
+title: "Basic Canvas 3"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Basic Canvas 3}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## A simple drawing canvas
+
+* Left mouse is used to active drawing mode
+* Pressing SPACE will clear the canvas
+* extra logic is used to store prior coordinates in the global state so 
+  that the output is a continuous line when drawing
+
+## Event Loop Considerations
+
+
+
+```{r setup, eval=FALSE}
+library(grid)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set up the global variables which store the state of the world
+#  'drawing'  Currently drawing?
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+drawing <- FALSE
+last_x  <- NA
+last_y  <- NA
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The main 'draw' function - his function is called repeatedly within the eventloop.
+#
+# If 'event' is not NULL, then it means that the user interacted with the
+# display.  The following events have an effect on the canvas:
+#  - hold mouse to set drawing mode
+#  - releasing the mouse button stops drawing mode
+#  - pressing SPACE clears the canvas
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw <- function(event, mouse_x, mouse_y, ...) {
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Process events
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.null(event)) {
+    if (event$type == 'mouse_down') {
+      drawing <<- TRUE
+    } else if (event$type == 'mouse_up') {
+      drawing <<- FALSE
+      last_x <<- NA
+      last_y <<- NA
+    } else if (event$type == 'key_press' && event$char == ' ') {
+      grid::grid.rect(gp = gpar(col=NA, fill='white')) # clear screen
+      last_x <<- NA
+      last_y <<- NA
+    }
+  }
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # If drawing mode is active, draw from the last point to this point.
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (drawing) {
+    if (!is.na(last_x)){
+      grid::grid.lines(
+        x = c(last_x, mouse_x),
+        y = c(last_y, mouse_y)
+      )
+    }
+    
+    last_x <<- mouse_x
+    last_y <<- mouse_y
+  }
+  
+  
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop.  
+# Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(draw, fps_target = NA, double_buffer = FALSE)
+```
+
+<video controls>
+  <source src="images/basic-canvas-smooth.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+

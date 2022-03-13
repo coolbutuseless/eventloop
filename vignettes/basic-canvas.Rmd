@@ -1,0 +1,116 @@
+---
+title: "Basic Canvas"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Basic Canvas}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## A simple drawing canvas
+
+* A standard R matrix is used to store 0/1 values which will be displayed as
+  black/white tiles
+* Left/Right mouse are used to activate drawing in black/white respectively
+* Pressing SPACE will clear the canvas
+
+
+
+## Event Loop Considerations
+
+* The world does not update every frame, but only when the user interacts.
+  This slow rate of change means that double buffering can be disabled for this example
+  and there is little chance of screen tearing or flickering during updates.
+* By disabling double-buffering, this also avoids the mouse icon flickering
+  as the device switches between hold/flush operations.  This change-of-state
+  of the mouse icon for every drawing operation is baked into R and will
+  always be present for double-buffered presentation.
+
+
+
+```{r setup, eval=FALSE}
+library(grid)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set up the global variables which store the state of the world
+#   N      size of grid
+#  canvas  the actual canvas
+#  pen     the current pen state. Use 'NA' to indicate "not drawing"
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N      <- 8
+canvas <- matrix(1L, N, N)
+pen    <- NA_integer_
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The main 'draw' function - his function is called repeatedly within the eventloop.
+#
+# If 'event' is not NULL, then it means that the user interacted with the
+# display.  The following events have an effect on the canvas:
+#  - left/right mouse click sets the pen colour to black/white respectively
+#  - releasing the mouse button stops drawing mode
+#  - pressing SPACE clears the canvas
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw <- function(event, mouse_x, mouse_y, ...) {
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Process events
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.null(event)) {
+    if (event$type == 'mouse_down') {
+      cat(event$button)
+      if (event$button == 0) {
+        pen <<- 0L
+      } else if (event$button == 2) {
+        pen <<- 1L
+      }
+    } else if (event$type == 'mouse_up') {
+      pen <<- NA_integer_
+    }
+    
+    if (event$type == 'key_press' && event$char == ' ') {
+      canvas <<- matrix(1L, N, N)
+      grid::grid.raster(canvas, interpolate = FALSE)
+    }
+  }
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # If the pen is currently active, then draw on the canvas and display
+  # the latest version.
+  # Note that graphics coordiates are from bottom-left of screen, while
+  # matrix coordinates are from top-left.  So the y-axis must be inverted
+  # to set a matrix location from a mouse position
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.na(pen)) {
+    col <-       round(mouse_x * N + 0.5)
+    row <- N+1 - round(mouse_y * N + 0.5)
+    
+    canvas[row, col] <<- pen
+    grid::grid.raster(canvas, interpolate = FALSE)
+  }
+  
+  
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop.  
+# Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(draw, double_buffer = FALSE)
+```
+
+
+<video controls>
+  <source src="images/basic-canvas-grid.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+
