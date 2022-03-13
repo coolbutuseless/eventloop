@@ -38,7 +38,7 @@ verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
     if (event$type %in% c('mouse_down', 'mouse_up')) {
       cat(co, "Mouse: ", event$type, " - button: ", event$button, "\n")
     } else if (event$type == 'mouse_move') {
-      cat(co, "Move: ", mouse_x, mouse_y, "\n")
+      cat(co, "Move \n")
     } else if (event$type == 'key_press') {
       cat(co, "Key: ", event$char, " - integer value [", event$int, "]\n")
     }
