@@ -190,6 +190,14 @@ But since I have displaylists turned off, just paint over everything with
 a white rectangle rather than call 'newpage()'
 
 
+## Discussion on 'callbacks'
+
+* graphcs devices in R may suport them to monitor for events.
+* without 'onIdle' there's a way to react when an event happens, 
+  but if the user isn't doing anything, then no callback gets called!
+  which means the world state depends totally on the user, and never 
+  acts independently!
+
 ## Events supported by R graphics devices
 
 | device    | type             | mouse down | mouse move | mouse up | keyboard | double buffered | canGenIdle |
