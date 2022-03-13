@@ -51,7 +51,10 @@ games and other 'realtime' animated possiblilities.
 * Standard note on why the vignettes only link to mp4
     * Since an interactive app can't be captured within a vignette, a video 
       screen capture has been included with this vignette.
-
+* Be able to set the initial canvas colour
+* Throw an error if system == windows
+    "Windows does not support a device with an 'onIdle' callback which 
+     is necessary to use the eventloop package"
 
 ## EventLoop: an interactive graphical programming "system/process/paradigm?" for R
 
