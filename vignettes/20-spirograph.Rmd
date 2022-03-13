@@ -140,3 +140,9 @@ draw <- function(event, mouse_x, mouse_y, ...) {
 eventloop::run_loop(draw, double_buffer = FALSE)
 ```
 
+
+<video controls>
+  <source src="images/spirograph.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+

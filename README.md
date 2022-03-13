@@ -14,20 +14,31 @@ games and other ‘realtime’ animated possiblilities.
 
 ## ToDo before release:
 
+-   Introductory vignettes
+    -   Small concepts
+-   A reference vignette showing all the values that are passed to the
+    core function
 -   Tidy Vignettes
     -   Consistent documentation across all examples. i.e. same headings
 -   New vignettes:
     -   Using an R6 object to manage the state rathen than having global
         vars
-    -   Wordle
+    -   Wordle(?)
+-   Dual licensed MIT and GPL3
+-   Standard note on why the vignettes only link to mp4
+    -   Since an interactive app can’t be captured within a vignette, a
+        video screen capture has been included with this vignette.
 
 ## EventLoop: an interactive graphical programming “system/process/paradigm?” for R
 
 -   R is great
--   It’s story for interactive applications seems limited er.
--   Other interactive elements are possible, but you’re handing over
-    your session to javascript and writing html/css/js! e.g. plotly
--   I was after a fast, reactive graphical interface
+-   The story for interactive applications is unexplored.
+-   Interactive apps are curently possible, but often you’re handing
+    over your session to javascript and writing html/css/js! e.g. plotly
+    and shiny
+-   I was after a fast, reactive graphical interface that used only R
+    code but still takes care of the infrastructure needed for
+    interactivity e.g. framerate control, event capturing etc.
 
 Next Slide:
 
@@ -257,6 +268,15 @@ Show captured mp4s of these. Too risky to do live!
 -   Asteroids
 -   raycaster engine
 
+## Tips
+
+-   `ggplot2` is a great package, but because of the all the layout and
+    scaling that goes into one of its great-looking plots, it’s not
+    speedy.
+-   Instead just do raw `grid::grid.points()` etc calls.
+-   Avoid `grid.newpage()`it does a lot more than clear the page.
+    -   instead just draw a giant rectangle to cover the screen.
+
 ## Issues
 
 -   Only the real `x11()` device on a unix or macOS system has the
@@ -266,6 +286,7 @@ Show captured mp4s of these. Too risky to do live!
 -   Sometimes the device gets locked in a slow state on macOS. I am
     unsure on why this happens, but when it does I need to
     logout-then-login to return to the high-speed state.
+-   Not tested with non-square device sizes
 
 ## Future for interactive apps in R
 
@@ -287,65 +308,69 @@ You can install from
 remotes::install_github('coolbutuseless/eventloop')
 ```
 
-## Example - colour cycling
+## Example - Basic Drawing app
 
 The following is a basic interactive example.
 
-When you click-and-hold the mouse button in the window, the colour will
-cycle through 100 colours of the rainbox.
-
-Releasing the mouse will halt the colour cycling
-
-``` r
+``` eval
+library(grid)
 library(eventloop)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Define global variables which will maintain the state of the 'game'
+# Set up the global variables which store the state of the world
+#  'drawing'  Currently drawing?
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-colours <- rainbow(100)
-latch   <- FALSE
+drawing <- FALSE
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Define the operations to be performed each loop
+# The main 'draw' function - his function is called repeatedly within the eventloop.
+#
+# If 'event' is not NULL, then it means that the user interacted with the
+# display.  The following events have an effect on the canvas:
+#  - hold mouse to set drawing mode
+#  - releasing the mouse button stops drawing mode
+#  - pressing SPACE clears the canvas
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-colour_cycle <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
-                         fps_taget, dev_width, dev_height, ...) {
+draw <- function(event, mouse_x, mouse_y, ...) {
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # If there has been an event, then process it
-  # All this code does is
-  #   - set 'latch' to TRUE if a mouse button is pressed
-  #   - sets 'latch' to FALSE when the mouse button is released
+  # Process events
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (!is.null(event)) {
     if (event$type == 'mouse_down') {
-      latch <<- TRUE
-      msg <- sprintf("(%.1f, %.1f), (%f, %f) %.1f", mouse_x, mouse_y, dev_width, dev_height, fps_actual)
-      cat(msg, "\n")
+      drawing <<- TRUE
     } else if (event$type == 'mouse_up') {
-      latch <<- FALSE
+      drawing <<- FALSE
+    } else if (event$type == 'key_press' && event$char == ' ') {
+      grid::grid.rect(gp = gpar(col=NA, fill='white')) # clear screen
     }
   }
-
+  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # If the 'latch' is on then choose a colour based upon the current frame number
-  # otherwise set colour to white
+  # If the pen is currently active, then draw on the canvas and display
+  # the latest version.
+  # Note that graphics coordiates are from bottom-left of screen, while
+  # matrix coordinates are from top-left.  So the y-axis must be inverted
+  # to set a matrix location from a mouse position
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if (latch) {
-    col <- colours[[(frame_num %% 100) + 1L]]
-  } else {
-    col <- 'white'
+  if (drawing) {
+    grid::grid.circle(
+      x = mouse_x, 
+      y = mouse_y,
+      r = unit(5, 'pt'),
+      gp = gpar(fill='black')
+    )
   }
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Fill the screen with the current colour
-  # Draw an FPS counter
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  grid::grid.rect(gp = grid::gpar(fill = col))
+  
+  
 }
 
 
-run_loop(colour_cycle, 7, 7, show_fps = TRUE)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop.  
+# Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(draw, double_buffer = FALSE)
 ```
 
 ## Example - Raycaster
