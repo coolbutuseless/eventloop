@@ -1,0 +1,51 @@
+---
+title: "Event Reference"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Event Reference}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(eventloop)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' A verbose callback that simply prints information about what's happening
+#' 
+#' @param event the event structre. event=NULL if no event needs to be processed
+#' @param mouse_x,mouse_y current location of mouse within window. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num integer count of which frame this is
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                    fps_target, dev_width, dev_height, ...) {
+  
+  if (!is.null(event)) {
+    co <- sprintf("[%.2f, %.2f]", mouse_x, mouse_y)
+    if (event$type %in% c('mouse_down', 'mouse_up')) {
+      cat(co, "Mouse: ", event$type, " - button: ", event$button, "\n")
+    } else if (event$type == 'mouse_move') {
+      cat(co, "Move: ", mouse_x, mouse_y, "\n")
+    } else if (event$type == 'key_press') {
+      cat(co, "Key: ", event$char, " - integer value [", event$int, "]\n")
+    }
+  }
+}
+
+
+
+eventloop::run_loop(verbose, fps_target = 10, show_fps = TRUE)
+```
