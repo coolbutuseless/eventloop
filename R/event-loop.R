@@ -31,7 +31,7 @@ onMouseDown <- function(button, x, y) {
 #   graphics event environment
 # - The onIdle callback will use this event data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-onMouseUp <- function(button, x, y) {
+onMouseUp <- function(button, x, y, ...) {
 
   event_env <- getGraphicsEventEnv()
 

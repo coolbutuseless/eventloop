@@ -55,7 +55,7 @@ draw <- function(event, mouse_x, mouse_y, ...) {
       drawing <<- FALSE
     } else if (event$type == 'key_press' && event$char == ' ') {
       grid::grid.rect(gp = gpar(col=NA, fill='white')) # clear screen
-    }
+    } 
   }
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
