@@ -1,0 +1,222 @@
+---
+title: "Wordle"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Wordle}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+set.seed(1)
+```
+
+```{r setup}
+library(grid)
+library(eventloop)
+library(ggplot2)
+```
+
+## Introduction
+
+**Wordle** is a word guessing game that you can [play online](https://www.nytimes.com/games/wordle/index.html).
+
+The goal is to guess a hidden target word by making guesses and 
+receiving feedback on which letters in your guess are part of the target word.
+
+
+# This Worldle game
+
+This is a very 'lite' version of a Wordle game.
+
+* No dictionary of words - any 5 letters in a row are considered a valid guess
+* Hardcoded target word
+* User must press "ENTER" to confirm word
+* BACKSPACE is available
+
+
+You could easily add all these things with a little bit of work, but I'm 
+keeping this example simple so that the event logic is as clear as can be
+
+## Setup
+
+```{r}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The colours
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+col_grey   <- grey(0.7)
+col_green  <- "green"
+col_yellow <- "yellow"
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Get a sequence of 5 colours given a guess word and a target word
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+get_colours <- function(guess, target) {
+  
+  # if the word is not yet complete, the return a vector of NAs
+  # which will show up as 'blank' when filling the squares
+  if (length(guess) == 0 || is.na(guess) || trimws(guess) == '' || nchar(guess) < 5) {
+    return(rep(NA, 5))
+  }
+  
+  guess  <- toupper(guess)
+  target <- toupper(target)
+  
+  # Split the guess and target into individual letters
+  this_cols <- rep(col_grey, 5)
+  guess_letters <- strsplit(guess, '')[[1]]
+  ref <- strsplit(target, '')[[1]]
+  
+  # Do the logic to get greens (easy)
+  matched <- which(guess_letters == ref)
+  this_cols[matched] <- col_green
+  
+  # Do the logic to figure out where the yellows are
+  # This is more difficult
+  ref[matched] <- '*'
+  check_pos <- setdiff(1:5, matched)
+  
+  for (pos in check_pos) {
+    letter <- guess_letters[pos]
+    if (letter %in% ref) {
+      this_cols[pos] <- col_yellow
+      remove <- which(ref == letter)[1]
+      ref[remove] <- '*'
+    }
+  }
+  
+  
+  return(this_cols)
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Positions for letters/squares
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+pos <- expand.grid(
+  x = seq.int(0.2, 0.8, length.out = 5),
+  y = seq.int(0.1, 0.9, length.out = 6)
+)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Draw a board given guesses and target word
+# No sanity checking is done here for number of guesses, length of target etc
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw_board <- function(guesses, target, current_wordnum) {
+  lets <- unlist(strsplit(guesses, ''))
+  length(lets) <- 30
+  lets[is.na(lets)] <- ''
+ 
+  cols <- unlist(lapply(guesses, get_colours, target = target))
+  
+  # ensure we don't highlight the current word while working on it.
+  cols[5 * (current_wordnum - 1) + 1:5] <- NA_character_
+  
+  length(cols) <- 30
+   
+  grid.newpage()
+  width <- height <- 0.13
+  grid.rect(
+    x      = pos$x, 
+    y      = 1 - pos$y, 
+    width  = width, 
+    height = height, 
+    default.units = 'snpc', 
+    gp = gpar(fill = cols)
+  )
+
+  grid.text(lets, x = pos$x, y = 1 - pos$y, default.units = 'snpc',
+            gp = gpar(cex = 2))
+}
+```
+
+
+## Running the Game in an event loop
+
+```{r eval = FALSE}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Global state for the eventloop
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+init    <- FALSE    # Has the puzzle been started?
+solved  <- FALSE    # Has the puzzle been solved?
+failed  <- FALSE    # Has the user completely failed to guess?
+guesses <- c('')    # The guesses from the user
+target  <- 'HELLO'  # The target word
+
+current <- c() # the letters in the current guess
+wordnum <- 1   # which attempt?
+
+wordle <- function(event, ...) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # If this is  first frame then the board *MUST* be drawn
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  if (!init) {
+    init <<- TRUE
+    draw_board(guesses, target, wordnum)
+  }
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  # Build the current word a letter at a time
+  # When the current word is 5 letters long, then add it to the list of guesses
+  # Watch for the latest word matching target word => puzzle solved!
+  # Watch for guesses exceeding 6 => user has failed!
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  if (!failed && !solved && !is.null(event)) {
+    if (event$type == 'key_press') {
+      if (event$char %in% c(letters, LETTERS) && length(current) < 5) {
+        current <<- c(current, toupper(event$char))
+        guesses[wordnum] <<- paste(current, collapse = '')
+        draw_board(guesses, target, wordnum)
+      } else if (event$int == 13 && length(current) == 5) { 
+        # RETURN
+        current <<- c()
+        if (guesses[wordnum] == target) {
+          solved <<- TRUE
+          wordnum <<- wordnum + 1
+          cat("Solved")
+        } else {
+          wordnum <<- wordnum + 1
+          failed  <<- wordnum > 6
+        }
+        draw_board(guesses, target, wordnum)
+      } else if (event$int == 8 && length(current) > 0) {
+        # DELETE
+        current <<- current[-length(current)]
+        guesses[wordnum] <<- paste(current, collapse = '')
+        draw_board(guesses, target, wordnum)
+      }
+    }
+    if (solved) {
+      grid.text(label = "Solved!", gp = gpar(col = 'blue', cex = 5))
+    }
+    if (failed) {
+      grid.text(label = "Failed!", gp = gpar(col = 'red', cex = 5))
+    }
+  }
+
+  
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Since we are only drawing in response to user input, we can do without 
+# a double buffered display
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(wordle, double_buffer = FALSE)
+```
+
+
+<!--  <video controls> -->
+<!--   <source src="images/unruly.mp4" type="video/mp4"> -->
+<!--   Your browser does not support the video tag. -->
+<!-- </video>  -->
+
+

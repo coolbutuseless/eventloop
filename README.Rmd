@@ -337,6 +337,7 @@ Show captured mp4s of these.  Too risky to do live!
     * is there need for a new device for modern macs?
 * Remove "switch to busy pointer" when doing double buffering hold/flush in x11()
 * Mouse button presses, but no mouse wheel (as far as i can tell)
+* Monotonically increasing device numbers.
 
 ## Installation
 

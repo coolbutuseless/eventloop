@@ -61,13 +61,6 @@ mouse position are set to "active".
 library(eventloop)
 library(grid)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Standard blank vectors needed when shifting the current board in 8 
-# different directions
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-blankN   <- rep(0L, N   )
-blankNm1 <- rep(0L, N-1L)
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global State
@@ -80,6 +73,13 @@ N <- 100
 g <- matrix(sample(c(0L, 1L), N*N, replace = TRUE), N, N)
 latch <- FALSE
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Standard blank vectors needed when shifting the current board in 8 
+# different directions
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+blankN   <- rep(0L, N   )
+blankNm1 <- rep(0L, N-1L)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The gave of life

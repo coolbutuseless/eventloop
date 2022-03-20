@@ -14,12 +14,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, eval = FALSE}
 library(eventloop)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' A verbose callback that simply prints information about what's happening
+#' to the R console
 #' 
 #' @param event the event structre. event=NULL if no event needs to be processed
 #' @param mouse_x,mouse_y current location of mouse within window. If mouse is 
