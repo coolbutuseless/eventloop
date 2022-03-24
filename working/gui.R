@@ -348,6 +348,10 @@ ui_spec <- hstack(
   )
 )
 
+
+
+
+
 extents_df <- ui_spec_to_extents_df(ui_spec)
 print(extents_df)
 
@@ -359,7 +363,7 @@ g <- ui_spec_to_grobTree(ui_spec)
 
 
 x11(type = 'cairo', width = 8, height = 6, antialias = 'none')
-dev.control(displaylist = 'inhibit')
+# dev.control(displaylist = 'inhibit')
 grid.newpage()
 grid.draw(g)
 
