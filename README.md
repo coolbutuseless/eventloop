@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# eventloop <img src="man/figures/eventloop-logo.png" align="right" height="230/"/>
+# eventloop <img src="man/figures/eventloop-logo.png" align="right" width="230"/>
 
 <!-- badges: start -->
 
@@ -12,19 +12,20 @@
 R graphics device at speeds fast enough to be considered interesting for
 games and other ‘realtime’ animated possiblilities.
 
+### NOTE: MacOS `xquartz/x11` and \*nix `x11()` devices only
+
+Only the `x11` device on macOS and \*nix platforms includes an
+`onIdle()` event callback which is necessary for `eventloop` to work.
+
 ## ToDo before release:
 
 -   Introductory vignettes
-    -   Small concepts
--   A reference vignette showing all the values that are passed to the
-    core function
+    -   Overall concept
 -   Tidy Vignettes
     -   Consistent documentation across all examples. i.e. same headings
 -   New vignettes:
     -   Using an R6 object to manage the state rathen than having global
         vars
-    -   Wordle(?)
--   Dual licensed MIT and GPL3
 -   Standard note on why the vignettes only link to mp4
     -   Since an interactive app can’t be captured within a vignette, a
         video screen capture has been included with this vignette.
