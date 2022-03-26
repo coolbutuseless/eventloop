@@ -14,8 +14,8 @@ games and other ‘realtime’ animated possiblilities.
 
 ### NOTE: MacOS `xquartz/x11` and \*nix `x11()` devices only
 
-Only the `x11` device on macOS and \*nix platforms includes an
-`onIdle()` event callback which is necessary for `eventloop` to work.
+Only the `x11` device on macOS and \*nix platforms includes the support
+for events which are necessary for `eventloop` to work.
 
 ## ToDo before release:
 
