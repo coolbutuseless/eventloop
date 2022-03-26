@@ -27,13 +27,29 @@ ys <- runif(1000)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Draw a rotating/expanding starfield
-#
-#  Standard variables defined as part of rendering framework
-#  - x, y         coordinates of mouse in npc i.e. range [0, 1]
-#  - width,height dimensions of window in pixels
-#  - fps          frames per second in last 100 frames
-#  - frame        current frame number (integer sequence starting from 1)
+#' Draw a rotating/expanding starfield where the spawn point follows the mouse
+#' 
+#' Press ESC to quit.
+#'
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$char` holds the character as string
+#'               - `event$int` holds the integer representation
+#' @param mouse_x,mouse_y current location of mouse within window. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num integer count of which frame this is
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 starfield <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
                          fps_target, dev_width, dev_height, ...) {

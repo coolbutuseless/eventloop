@@ -1,8 +1,8 @@
 ---
-title: "Event Reference"
+title: "Event Reference Example"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Event Reference}
+  %\VignetteIndexEntry{Event Reference Example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,15 +14,33 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Event Reference Example
+
+The following example just prints information to the console about the 
+events that are happening in the window.
+
+
+
 ```{r setup, eval = FALSE}
 library(eventloop)
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' A verbose callback that simply prints information about what's happening
-#' to the R console
+#' This is a verbose callback that simply prints information to the console
+#' about what events are happening
 #' 
-#' @param event the event structre. event=NULL if no event needs to be processed
+#' Press ESC to quit.
+#' 
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$char` holds the character as string
+#'               - `event$int` holds the integer representation
 #' @param mouse_x,mouse_y current location of mouse within window. If mouse is 
 #'        not within window, this will be set to the last available coordinates
 #' @param frame_num integer count of which frame this is
@@ -30,6 +48,7 @@ library(eventloop)
 #'        by the user
 #' @param dev_width,dev_height the width and height of the output device. Note:
 #'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
                     fps_target, dev_width, dev_height, ...) {

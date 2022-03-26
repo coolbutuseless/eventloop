@@ -51,13 +51,35 @@ pen    <- NA_integer_
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# The main 'draw' function - his function is called repeatedly within the eventloop.
-#
-# If 'event' is not NULL, then it means that the user interacted with the
-# display.  The following events have an effect on the canvas:
-#  - left/right mouse click sets the pen colour to black/white respectively
-#  - releasing the mouse button stops drawing mode
-#  - pressing SPACE clears the canvas
+#' The main 'draw' function called within the eventloop
+#' 
+#' Press ESC to quit..
+#'
+#' If 'event' is not NULL, then it means that the user interacted with the
+#' display.  The following events have an effect on the canvas:
+#'  - left/right mouse click sets the pen colour to black/white respectively
+#'  - releasing the mouse button stops drawing mode
+#'  - pressing SPACE clears the canvas
+#'
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$char` holds the character as string
+#'               - `event$int` holds the integer representation
+#' @param mouse_x,mouse_y current location of mouse within window. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num integer count of which frame this is
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 draw <- function(event, mouse_x, mouse_y, ...) {
   

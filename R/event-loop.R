@@ -325,7 +325,7 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  cat('Starting Event Loop ... ')
+  cat('Starting Event Loop. Press ESC in window to quit.')
   grDevices::getGraphicsEvent()
 
   invisible(NULL)
