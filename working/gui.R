@@ -362,8 +362,72 @@ g <- ui_spec_to_grobTree(ui_spec)
 
 
 
-x11(type = 'cairo', width = 8, height = 6, antialias = 'none')
-# dev.control(displaylist = 'inhibit')
+# x11(type = 'cairo', width = 8, height = 6, antialias = 'none')
+# # dev.control(displaylist = 'inhibit')
+# grid.newpage()
+# grid.draw(g)
+#
+#
+# locate <- function() {
+#   v <- grid.locator(unit = 'npc')
+#   list(
+#     x = as.numeric(v$x),
+#     y = as.numeric(v$y)
+#   )
+# }
+#
+#
+# library(dplyr)
+
+# for (i in 1:20) {
+#   # print("Locate point...")
+#   coords <- locate()
+#   # print(coords)
+#
+#
+#   res <- extents_df %>%
+#     filter(coords$x >= x1, coords$x < x2,
+#            coords$y >= y1, coords$y < y2)
+#
+#   print(res$id)
+# }
+
+# extents <- list(x = 0, y = 0, w = 1, h = 1)
+# heights <- c(0.3, 0.4, 0.3)
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Overlay on plot
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ui_spec <- vstack(
+  hstack(
+    elem("next" , button(textGrob('Next Plot' )) , width = 2),
+    elem("data"  , button(textGrob('New Data'  )))
+  ),
+  elem("blank", grid::nullGrob(), height = 10)
+)
+
+
+
+
+
+extents_df <- ui_spec_to_extents_df(ui_spec)
+print(extents_df)
+
+
+# ui_spec
+g <- NULL
+g <- ui_spec_to_grobTree(ui_spec)
+
+
+
+x11(type = 'dbcairo', width = 8, height = 6, antialias = 'none')
+dev.control(displaylist = 'inhibit')
 grid.newpage()
 grid.draw(g)
 
@@ -379,8 +443,22 @@ locate <- function() {
 
 library(dplyr)
 
-for (i in 1:20) {
-  # print("Locate point...")
+plot_num <- 1
+plot_data <- rpois(100, 0.5)
+
+
+for (i in 1:10) {
+
+  dev.hold()
+  grid.rect(gp = gpar(fill='white', col = NA))
+  if (plot_num == 1) {
+    plot(plot_data, type='b')
+  } else {
+    hist(plot_data, main="")
+  }
+  grid.draw(g)
+  dev.flush()
+
   coords <- locate()
   # print(coords)
 
@@ -390,24 +468,15 @@ for (i in 1:20) {
            coords$y >= y1, coords$y < y2)
 
   print(res$id)
+
+  if (res$id == 'data') {
+    plot_data <<- rpois(100, 0.5)
+  } else if (res$id == 'next') {
+    plot_num <<- plot_num + 1
+  }
+
+
 }
-
-# extents <- list(x = 0, y = 0, w = 1, h = 1)
-# heights <- c(0.3, 0.4, 0.3)
-
-
-
-
-
-
-
-# library(ggplot2)
-# ggplot(extents_df) +
-#   geom_rect(aes(xmin=x, ymin=y, xmax=x+w, ymax=y+h), fill = NA, colour = 'red')
-#
-#
-
-
 
 
 
