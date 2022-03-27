@@ -1,8 +1,8 @@
 ---
-title: "Reactive Objects 2"
+title: "Reactive Objects"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Reactive Objects 2}
+  %\VignetteIndexEntry{Reactive Objects}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

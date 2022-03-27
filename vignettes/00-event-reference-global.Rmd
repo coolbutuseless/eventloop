@@ -19,10 +19,16 @@ knitr::opts_chunk$set(
 The following example just prints information to the console about the 
 events that are happening in the window.
 
+This could be a good place to start if developing code from scratch.
 
 
 ```{r setup, eval = FALSE}
 library(eventloop)
+
+# Global variables to keep some state information between calls
+last_x <- NA
+last_y <- NA
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' This is a verbose callback that simply prints information to the console
@@ -53,7 +59,22 @@ library(eventloop)
 verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
                     fps_target, dev_width, dev_height, ...) {
   
+  # Did an event happen at all in this window?
   if (!is.null(event)) {
+    
+    # Draw a line
+    if (!is.na(last_x)) {
+      grid::grid.lines(
+        x = c(last_x, mouse_x),
+        y = c(last_y, mouse_y)
+      )
+    }
+    
+    # Keep track of latest mouse position
+    last_x <<- mouse_x
+    last_y <<- mouse_y
+    
+    # "Handle" the event by printing to console
     co <- sprintf("[%.2f, %.2f]", mouse_x, mouse_y)
     if (event$type %in% c('mouse_down', 'mouse_up')) {
       cat(co, "Mouse: ", event$type, " - button: ", event$button, "\n")
