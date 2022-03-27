@@ -161,8 +161,10 @@ run_loop(game_of_life, 7, 7, fps_target = 30, show_fps = TRUE)
 ```
 
 
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
 
- <video controls>
+<video controls>
   <source src="images/game-of-life.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video> 

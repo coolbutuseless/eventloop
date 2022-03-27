@@ -99,6 +99,10 @@ monitor_status <- function(...) {
 run_loop(monitor_status, show_fps = TRUE, fps_target = 30)
 ```
 
+
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
 <video controls>
   <source src="images/plotting.mp4" type="video/mp4">
   Your browser does not support the video tag.

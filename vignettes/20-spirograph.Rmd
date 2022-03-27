@@ -162,6 +162,8 @@ draw <- function(event, mouse_x, mouse_y, ...) {
 eventloop::run_loop(draw, double_buffer = FALSE)
 ```
 
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
 
 <video controls>
   <source src="images/spirograph.mp4" type="video/mp4">

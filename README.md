@@ -19,20 +19,14 @@ for events which are necessary for `eventloop` to work.
 
 ## ToDo before release:
 
--   Introductory vignettes
-    -   Overall concept
--   Tidy Vignettes
-    -   Consistent documentation across all examples. i.e. same headings
--   New vignettes:
+-   Vignettes
+    -   Concepts of an event loop. Put in README
+    -   Reactive updates vs Continual updates
+    -   Consistent documentation across all vignettes i.e. same headings
+    -   Instructions for each vignette on what each key/mouse move does
     -   Using an R6 object to manage the state rathen than having global
         vars
--   Standard note on why the vignettes only link to mp4
-    -   Since an interactive app can’t be captured within a vignette, a
-        video screen capture has been included with this vignette.
--   Be able to set the initial canvas colour
--   Throw an error if system == windows “Windows does not support a
-    device with an ‘onIdle’ callback which is necessary to use the
-    eventloop package”
+-   Be able to set the initial canvas colour?
 
 ``` r
 # install.package('remotes')

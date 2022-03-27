@@ -131,6 +131,9 @@ eventloop::run_loop(draw, double_buffer = FALSE)
 ```
 
 
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
 <video controls>
   <source src="images/basic-canvas-grid.mp4" type="video/mp4">
   Your browser does not support the video tag.

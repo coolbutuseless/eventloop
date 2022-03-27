@@ -266,7 +266,22 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE,
                      double_buffer = TRUE) {
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Sanity Check
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (.Platform$OS.type == 'windows') {
+    stop("The 'eventloop' package is not compatible with windows because the ",
+         "graphics devices do not support the required interaction events")
+  }
 
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Double buffering isn't always required
+  # E.g. a purely reactive app which only changes when the user clicks can
+  # be "single buffered".
+  # Double buffering appears "ugly" in some circumstances as the mouse will
+  # flicker between 'busy' and 'non-busy' icons
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (double_buffer) {
     type <- 'dbcairo'
   } else {

@@ -94,6 +94,8 @@ run_loop(starfield, fps_target = NA)
 ```
 
 
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
 
 <video controls>
   <source src="images/starfield.mp4" type="video/mp4">

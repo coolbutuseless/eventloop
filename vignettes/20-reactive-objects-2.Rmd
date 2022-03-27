@@ -95,6 +95,9 @@ run_loop(canvas, 10, 10, fps_target = 30)
 ```
 
 
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
 <video controls>
   <source src="images/interact.mp4" type="video/mp4">
   Your browser does not support the video tag.

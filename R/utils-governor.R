@@ -9,7 +9,6 @@
 #' @param fs an FPS Structure storing global information for the FPS governor.
 #'        Create this object initially with \code{fs = init_fps_governor()}
 #' @return The current actual framerate
-#' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 fps_governor <- function(fps, fs) {
   .Call(fps_governor_, fps, fs)
@@ -17,7 +16,6 @@ fps_governor <- function(fps, fs) {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' @rdname fps_governor
-#' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 init_fps_governor <- function() {
   .Call(init_fps_governor_)

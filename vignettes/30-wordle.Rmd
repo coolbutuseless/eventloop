@@ -239,7 +239,10 @@ eventloop::run_loop(wordle, double_buffer = FALSE)
 ```
 
 
- <video controls>
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
+<video controls>
   <source src="images/wordle.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
