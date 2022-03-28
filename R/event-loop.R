@@ -282,8 +282,8 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'        by the user}
 #'          \item{\code{dev_width, dev_height}}{ - the width and height of the output device. Note:
 #'        this does not cope well if you resize the window}
-#'          \item{\code{...}}{ - Catch any other arguments.  Note that this is argument
-#'                is required in all \code{user_func} callback functions}
+#'          \item{\code{...}}{ - Catch any other arguments.  Note that this is
+#'                a required argument in all \code{user_func} callback functions}
 #'        }
 #' @param width,height size of graphics device to open in inches. Default: 7x7 inches
 #' @param fps_target target frames-per-second.  If rendering speed surpasses
@@ -291,7 +291,8 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'        back to the target rate. Set to NA to run as fast as possible.  Note
 #'        that even though the user supplied function might be called at a very
 #'        high rate, the actual screen update rate may be much much lower.
-#' @param show_fps show the fps. default: FALSE
+#' @param show_fps show the fps as text in the bottom left of the window.
+#'        Default: FALSE
 #' @param double_buffer use a double buffered device? Default: TRUE.  A
 #'        double buffered device is essential if you are updating the display
 #'        every frame e.g. a game of SuperMario.   For more static games
