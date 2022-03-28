@@ -245,10 +245,47 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Run the user supplied function as the idle function within the event loop
+#' Run the user supplied function within an event loop in a new graphics window
 #'
-#' @param user_func user function
-#' @param width,height size of graphics device to open. Default: 7x7 inches
+#' Create a new \code{X11()} graphics device and setup event callbacks such
+#' that the user-supplied callback function is run with appropriate
+#' parameters at the specified rate.
+#'
+#' @param user_func user-supplied callback function. This function will be
+#'        run by the system at the rate specified by \code{fps_target}.
+#'
+#'        At a minimum, this function should accept the \code{...} argument,
+#'        but the current full list of allowed arguments is:
+#'        \describe{
+#'          \item{\code{event}}{ - Event information from the graphics device.
+#'                This is NULL when no event occurred, otherwise it is a list
+#'                with a \code{type} element where:
+#'                \itemize{
+#'                \item{\code{event$type = 'mouse_down'} indicates a mouse button
+#'                      was clicked. \code{event$button} gives the integer
+#'                      index of the button.}
+#'                \item{\code{event$type = 'mouse_up'} indicates a mouse button
+#'                      was released. \code{event$button} gives the integer
+#'                      index of the button.}
+#'                \item{\code{event$type = 'key_press'} indicates a key was pressed
+#'                      on the keyboard. \code{event$char} holds the character as
+#'                      a string value. \code{event$int} holds the integer
+#'                      representation.  Note: both the character and integer
+#'                      representations may consist of multiple values because
+#'                      of how the graphics device treats modifier keys like CTRL}
+#'                }
+#'          }
+#'          \item{\code{mouse_x, mouse_y}}{ - current location of mouse within window. If mouse is
+#'        not within window, this will be set to the last available coordinates}
+#'          \item{\code{frame_num}}{ - integer count of which frame this is}
+#'          \item{\code{fps_actual, fps_target}}{ - the curent framerate and the framerate specified
+#'        by the user}
+#'          \item{\code{dev_width, dev_height}}{ - the width and height of the output device. Note:
+#'        this does not cope well if you resize the window}
+#'          \item{\code{...}}{ - Catch any other arguments.  Note that this is argument
+#'                is required in all \code{user_func} callback functions}
+#'        }
+#' @param width,height size of graphics device to open in inches. Default: 7x7 inches
 #' @param fps_target target frames-per-second.  If rendering speed surpasses
 #'        this then slight pauses will be added to each loop to bring this
 #'        back to the target rate. Set to NA to run as fast as possible.  Note
