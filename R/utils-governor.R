@@ -27,9 +27,13 @@ if (FALSE) {
 
   system.time({
     fs <- init_fps_governor()
-    for (i in seq(300)) {
-      fps_governor(60, fs)
-    }
+
+    # 300 frames at 60fps should take 5 seconds
+    system.time({
+      for (i in seq(300)) {
+        fps_governor(60, fs)
+      }
+    })
   })
 
 }

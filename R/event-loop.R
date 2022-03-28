@@ -1,7 +1,7 @@
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse Down - a button on the mouse is pressed
+# Mouse Down - The callback function run when a button on the mouse is pressed
 #
 # - The event loop will terminate as soon as this returns any non-NULL object
 # - So just capture the information about the event and put it in the
@@ -24,7 +24,7 @@ onMouseDown <- function(button, x, y) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse Up - a button on the mouse is released
+# Mouse Up - The callback function run when a button on the mouse is released
 #
 # - The event loop will terminate as soon as this returns any non-NULL object
 # - So just capture the information about the event and put it in the
@@ -47,7 +47,7 @@ onMouseUp <- function(button, x, y, ...) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse Move - the mouse is moved within the window
+# Mouse Move - The callback function run when the mouse is moved within the window
 #
 # - The event loop will terminate as soon as this returns any non-NULL object
 # - So just capture the information about the event and put it in the
@@ -72,7 +72,7 @@ onMouseMove <- function(button, x, y) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Key Press = a key is pressed
+# Key Press - The callback function run when a key is pressed
 #
 # - The event loop will terminate as soon as this returns any non-NULL object
 # - So just capture the information about the event and put it in the
@@ -105,13 +105,19 @@ onKeybd <- function(char) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Generate an 'onIdle' callback function that wraps the users target function
+# Generate an 'onIdle' callback function that wraps the users function
 #
-# This onIdle function prepares variables in the function environment so
-# the user doesn't have to do as much.
+# This final onIdle callback function:
+#   - interogates the graphics event environment to see if anything has happened
+#   - unpacks the current (x,y) coordinates if available
+#   - inserts pauses to try and slow down to the users target FPS
+#   - if double buffered calls `dev.hold()`
+#   - calls the users function
+#   - draws the FPS on screen if this has been requested
+#   - if double buffered, then calls `dev.flush()`
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
-                       double_buffer = TRUE) {
+                       double_buffer = TRUE, verbose = FALSE) {
 
   double_buffer <- isTRUE(double_buffer)
 
@@ -121,7 +127,9 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
   height     <- graphics::grconvertY(0, 'ndc', 'device')
   frame_num  <- 0L
 
-  message("Width: ", width, "  Height: ", height)
+  if (isTRUE(verbose)) {
+    message("Width: ", width, "  Height: ", height)
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Make extra, extra sure that 'fps_target' is a numeric, as this is
@@ -134,8 +142,9 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
   fs <- init_fps_governor()
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Define the actual callback function which wraps the user-given function
-  # This function:
+  # Define the actual callback function which is a wrapper around the
+  # the users function
+  # This final onIdle callback function:
   #   - stores any current (x,y) coords (regardless of whether the user
   #     handles them in some other way on a per-event basis within the
   #     user_func()
@@ -225,7 +234,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Clear the event after each call to the user_func()
-    # If the user hasn't handled it by now, they've missed it.
+    # If the user hasn't handled it by now, they've missed it!
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     event_env$event <- NULL
 
@@ -254,6 +263,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'        buffered devices avoid "screen tearing" when rendering, but because
 #'        of the way R handles the dev.hold/dev.flush operations, the mouse
 #'        will flicker between a normal pointer and a busy pointer.
+#' @param verbose Show more debugging information. Default: FALSE
 #'
 #' @return This function returns only when the user presses \code{ESC} within
 #'         the window, or some other terminating condition occurs.
@@ -264,15 +274,28 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE,
-                     double_buffer = TRUE) {
+                     double_buffer = TRUE, verbose = FALSE) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Sanity Check
+  # Sanity Check: Operating System
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (.Platform$OS.type == 'windows') {
     stop("The 'eventloop' package is not compatible with windows because the ",
          "graphics devices do not support the required interaction events")
   }
+
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Sanity Check: User func
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.function(user_func)) {
+    stop("'user_func' must be a function")
+  }
+
+  if (!('...' %in% formalArgs(user_func))) {
+    warning("'user_func' must have a '...' argument to ensure future compatibility")
+  }
+
 
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -308,12 +331,14 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
   grDevices::dev.control(displaylist = 'inhibit')
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Wrap the users function in the infrastructure which passes in
+  # Wrap the users callback function in the infrastructure which passes in
   # all the parameters at each call.
+  # This wrapped version of the users callback is then the 'onIdle'
+  # callback in the event handler
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   onIdle <- gen_onIdle(user_func, fps_target = fps_target,
                        show_fps = show_fps, this_dev = this_dev,
-                       double_buffer = double_buffer)
+                       double_buffer = double_buffer, verbose = verbose)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Set up the events on this device

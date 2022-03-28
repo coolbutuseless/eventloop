@@ -8,25 +8,70 @@
 ![](https://img.shields.io/badge/cool-useless-green.svg)
 <!-- badges: end -->
 
-`eventloop` provides a framework for rendering interactive events to an
-R graphics device at speeds fast enough to be considered interesting for
-games and other ‘realtime’ animated possiblilities.
+The `{eventloop}` package provides a framework for rendering interactive
+graphics and handling mouse+keyboard events from the user at speeds fast
+enough to be considered interesting for games and other realtime
+applications.
 
-### NOTE: MacOS `xquartz/x11` and \*nix `x11()` devices only
+[gameprogrammingpatterns.com](https://www.gameprogrammingpatterns.com/game-loop.html)
+defines an event loop (also known as a *game loop*) as follows:
 
-Only the `x11` device on macOS and \*nix platforms includes the support
-for events which are necessary for `eventloop` to work.
+    A game loop runs continuously during gameplay. Each turn of the loop, it 
+    processes user input without blocking, updates the game state, and renders 
+    the game. It tracks the passage of time to control the rate of gameplay.
+
+The `{eventloop}` package takes care of monitoring for keyboard+mouse
+events, and the user supplies another function to determine what happens
+with that input, and what gets drawn to the screen.
+
+#### NOTE: Windows does not support the device features needed to use this package
+
+Only the `x11()` device on macOS and \*nix platforms includes the
+support for events which are necessary for `eventloop` to work.
+
+This package does *not* work on windows.
+
+#### Overview of Process
+
+-   The user defines a callback function that is run repeatedly by the
+    system.
+-   If a user interaction has happened within the graphics device, then
+    the `event` variable (passed to the callback function) will be
+    non-NULL and contain details of the event.
+-   The user may choose to handle some, none or all different event
+    types in order to change the state of some global variables.
+-   The user may also choose what new things (if any) are drawn to the
+    graphics device each time the function is called.
+
+#### Tips
+
+-   If your screen only updates sporadically (e.g. a chess game), then
+    it could be appropriate to set `double_buffer = FALSE` to avoid the
+    mouse pointer flickering.
+-   For fast screen updates, set `double_buffer = TRUE`. This will
+    (unavoidably) cause the mouse pointer to flicker, but overall the
+    updates will be smoother.
+-   Set a limit on how often your function gets called by setting
+    `fps_target = [integer]` to be the number of times to call this
+    function every second (if this frame rate is possible to achieve).
+-   To run your function as fast as possible, set `fps_target = NA`
 
 ## ToDo before release:
 
+-   Settle on the nomencalture:
+    -   Use `callback` of `callback function` to refer to the user
+        function.
+    -   e.g. `the callback function is run`
+    -   e.g. `the user-supplied callback function`
 -   Vignettes
-    -   Concepts of an event loop. Put in README
     -   Reactive updates vs Continual updates
     -   Consistent documentation across all vignettes i.e. same headings
     -   Instructions for each vignette on what each key/mouse move does
-    -   Using an R6 object to manage the state rathen than having global
-        vars
 -   Be able to set the initial canvas colour?
+
+## List of Vignettes with a brief description
+
+## Installation
 
 ``` r
 # install.package('remotes')
@@ -35,7 +80,19 @@ remotes::install_github('coolbutuseless/eventloop')
 
 ## Example - Basic Drawing app
 
-The following is a basic interactive example.
+The following is a basic application which allows the user to draw lines
+with the mouse.
+
+Every time the callback function (`draw()`) is executed from within the
+event loop, it draws a line from the last mouse position to the current
+mouse position.
+
+The position of the mouse during the previous call is saved manually
+using global variables.
+
+A boolean variable (`drawing`) is used to note whether the mouse button
+is currently pressed or not. Changes to the screen only happend if
+`drawing == TRUE`.
 
 ``` eval
 library(grid)
@@ -43,20 +100,46 @@ library(eventloop)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up the global variables which store the state of the world
-#  'drawing'  Currently drawing?
+#  'drawing' = Is the mouse button currently pressed?
+#  last_x/last_y  = the last mouse position is manually saved every time
+#                 the callback function runs.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 drawing <- FALSE
 last_x  <- NA
 last_y  <- NA
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# The main 'draw' function - his function is called repeatedly within the eventloop.
-#
-# If 'event' is not NULL, then it means that the user interacted with the
-# display.  The following events have an effect on the canvas:
-#  - hold mouse to set drawing mode
-#  - releasing the mouse button stops drawing mode
-#  - pressing SPACE clears the canvas
+#' Callback function - 'draw()' 
+#'
+#' If 'event' is not NULL, then it means that the user interacted with the
+#' display.  
+#' 
+#' The following events are handled by this callback:
+#'  - hold mouse to set drawing mode
+#'  - releasing the mouse button stops drawing mode
+#'  - pressing SPACE clears the canvas
+#'  
+#' Press ESC to quit.
+#' 
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$char` holds the character as string
+#'               - `event$int` holds the integer representation
+#' @param mouse_x,mouse_y current location of mouse within window. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num integer count of which frame this is
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 draw <- function(event, mouse_x, mouse_y, ...) {
   
@@ -96,12 +179,8 @@ draw <- function(event, mouse_x, mouse_y, ...) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Start the event loop.  
-# Press ESC to quit
+# Start the event loop. Press ESC to quit.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-message("Hold mouse button to draw.")
-message("Press space to clear canvas.")
-message("Press ESC to quit.")
 eventloop::run_loop(draw, fps_target = NA, double_buffer = TRUE)
 ```
 
@@ -109,8 +188,8 @@ eventloop::run_loop(draw, fps_target = NA, double_buffer = TRUE)
 
 ## Example - Raycaster
 
-If your code can run fast enough in R, then you can do some more complex
-rendering.
+If the code in your callback function can run fast enough in R, then you
+can do some more complex rendering.
 
 Here’s a simple raycaster in plain R.
 
@@ -121,6 +200,11 @@ for code for this example.
 <img src="man/figures/raycaster.gif" />
 
 ## Related Software
+
+-   tcl/tk
+-   other GUI toolkits
+-   shiny
+-   documentation for `grid.locate()`
 
 ## Acknowledgements
 
