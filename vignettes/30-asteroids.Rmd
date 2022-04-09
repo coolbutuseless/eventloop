@@ -14,6 +14,23 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+
+## The 'Asteroids' arcade game
+
+Control a ship and avoid the asteroids!
+
+Note: No collision mechanism coded yet - so objects just pass through each other.
+
+## Controls
+
+* LEFT and RIGHT to rotate the ship
+* UP and DOWN to accelerate/decelerate the ship.
+* Press ESC to quit
+
+
+
+
 ```{r setup, eval=FALSE}
 library(eventloop)
 library(grid)
@@ -46,8 +63,6 @@ asyvel <- runif(Nasteroids)/200
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Update the positions of the asteroids and the users ship in the eventloop
-#'
-#' Press ESC to quit.
 #' 
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -56,6 +71,8 @@ asyvel <- runif(Nasteroids)/200
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -128,7 +145,10 @@ asteroids <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
   }
 }
 
-run_loop(asteroids, 7, 7)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+run_loop(asteroids)
 ```
 
 

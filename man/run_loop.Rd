@@ -31,6 +31,9 @@ run_loop(
                \item{\code{event$type = 'mouse_up'} indicates a mouse button
                      was released. \code{event$button} gives the integer
                      index of the button.}
+               \item{\code{event$type = 'mouse_move'} indicates the mouse
+                     was moved. \code{event$button} gives the integer
+                     index of the button being pressed}
                \item{\code{event$type = 'key_press'} indicates a key was pressed
                      on the keyboard. \code{event$char} holds the character as
                      a string value. \code{event$int} holds the integer
@@ -46,8 +49,8 @@ run_loop(
        by the user}
          \item{\code{dev_width, dev_height}}{ - the width and height of the output device. Note:
        this does not cope well if you resize the window}
-         \item{\code{...}}{ - Catch any other arguments.  Note that this is argument
-               is required in all \code{user_func} callback functions}
+         \item{\code{...}}{ - Catch any other arguments.  Note that this is
+               a required argument in all \code{user_func} callback functions}
        }}
 
 \item{width, height}{size of graphics device to open in inches. Default: 7x7 inches}
@@ -58,7 +61,8 @@ back to the target rate. Set to NA to run as fast as possible.  Note
 that even though the user supplied function might be called at a very
 high rate, the actual screen update rate may be much much lower.}
 
-\item{show_fps}{show the fps. default: FALSE}
+\item{show_fps}{show the fps as text in the bottom left of the window.
+Default: FALSE}
 
 \item{double_buffer}{use a double buffered device? Default: TRUE.  A
 double buffered device is essential if you are updating the display

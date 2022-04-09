@@ -3,4 +3,5 @@
 export(run_loop)
 import(grDevices)
 import(graphics)
+importFrom(methods,formalArgs)
 useDynLib(eventloop, .registration=TRUE)

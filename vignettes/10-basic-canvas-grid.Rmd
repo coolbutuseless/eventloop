@@ -14,25 +14,20 @@ knitr::opts_chunk$set(
 )
 ```
 
-## A simple drawing canvas
+## A simple discrete block-based drawing canvas
 
-* A standard R matrix is used to store 0/1 values which will be displayed as
-  black/white tiles
-* Left/Right mouse are used to activate drawing in black/white respectively
-* Pressing SPACE will clear the canvas
+This example shows how a matrix could be used to hold the drawing state 
+of a window.
 
+The canvas in this example is an integer matrix that the user can 'draw'
+upon by using the mouse.
 
+## Controls
 
-## Event Loop Considerations
-
-* The world does not update every frame, but only when the user interacts.
-  This slow rate of change means that double buffering can be disabled for this example
-  and there is little chance of screen tearing or flickering during updates.
-* By disabling double-buffering, this also avoids the mouse icon flickering
-  as the device switches between hold/flush operations.  This change-of-state
-  of the mouse icon for every drawing operation is baked into R and will
-  always be present for double-buffered presentation.
-
+* Press and hold the left mouse button to draw with black ink
+* Press and hold the right mouse button to draw with white ink
+* Press SPACE to clear the canvas
+* Press ESC to quit
 
 
 ```{r setup, eval=FALSE}
@@ -41,8 +36,8 @@ library(eventloop)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up the global variables which store the state of the world
-#   N      size of grid
-#  canvas  the actual canvas
+#  N       size of grid
+#  canvas  the actual canvas (an integer matrix)
 #  pen     the current pen state. Use 'NA' to indicate "not drawing"
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N      <- 8
@@ -52,14 +47,6 @@ pen    <- NA_integer_
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' The main 'draw' function called within the eventloop
-#' 
-#' Press ESC to quit..
-#'
-#' If 'event' is not NULL, then it means that the user interacted with the
-#' display.  The following events have an effect on the canvas:
-#'  - left/right mouse click sets the pen colour to black/white respectively
-#'  - releasing the mouse button stops drawing mode
-#'  - pressing SPACE clears the canvas
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -68,6 +55,8 @@ pen    <- NA_integer_
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -88,7 +77,6 @@ draw <- function(event, mouse_x, mouse_y, ...) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (!is.null(event)) {
     if (event$type == 'mouse_down') {
-      cat(event$button)
       if (event$button == 0) {
         pen <<- 0L
       } else if (event$button == 2) {
@@ -118,14 +106,11 @@ draw <- function(event, mouse_x, mouse_y, ...) {
     canvas[row, col] <<- pen
     grid::grid.raster(canvas, interpolate = FALSE)
   }
-  
-  
 }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Start the event loop.  
-# Press ESC to quit
+# Start the event loop. Press ESC to quit
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 eventloop::run_loop(draw, double_buffer = FALSE)
 ```

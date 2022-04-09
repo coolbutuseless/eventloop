@@ -21,9 +21,19 @@ library(eventloop)
 
 
 
+## Realtime stream-based plotting
+
+Plot new lines at every timestep as if drawing data from a sensor
+
+
+## Controls
+
+* The behaviour of this callback function is not influenced by anything the
+  user does.
+* Press ESC to quit
+
 
 ```{r eval = FALSE}
- 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Initialise a number of data streams
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,8 +47,6 @@ cols     <- rainbow(Nstreams)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' The plotting/behaviour at each call doesn't actually depend on anything
 #' the user is doing, so all arguments are ignored
-#' 
-#' Press ESC to quit.
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -47,6 +55,8 @@ cols     <- rainbow(Nstreams)
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -92,10 +102,12 @@ monitor_status <- function(...) {
       gp = gpar(col = cols[[i]])
     )
   }
-  
-  
 }
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 run_loop(monitor_status, show_fps = TRUE, fps_target = 30)
 ```
 

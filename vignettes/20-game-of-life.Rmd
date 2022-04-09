@@ -40,19 +40,17 @@ and summed efficiently to determine the next board state.
 
 ## Rendering in the Event Loop
 
-At every frame, the board is cleared and the entire board state is drawn
+At every frame, the board is cleared and the entire board state is updated, and then drawn
 from scratch using `grid::grid.raster()` to plot a matrix to the graphics
 output device.
 
-Also at every frame, a new board state is calculated.  If a `target_fps` is
-not set, and the simulation allowed to run as fast as possible, then the 
-board is updated over 100 times per second.
+## Controls
 
-## Interactivity
+* Press and hold the left mouse button to draw
+    * the board updates are paused, and the pixels nearest the 
+      mouse position are set to "active".  
+* Press ESC to quit
 
-This application watches for a mouse click by the user.  When the mouse
-is held down, the board updates are paused, and the pixels nearest the 
-mouse position are set to "active".  
 
 
 # Game of Life in R
@@ -82,9 +80,7 @@ blankN   <- rep(0L, N   )
 blankNm1 <- rep(0L, N-1L)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' The gave of life update function.
-#' 
-#' Press ESC to quit.
+#' The gave of life 
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -93,6 +89,8 @@ blankNm1 <- rep(0L, N-1L)
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string

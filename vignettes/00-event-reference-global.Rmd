@@ -16,8 +16,8 @@ knitr::opts_chunk$set(
 
 ## Event Reference Example
 
-The following example just prints information to the console about the 
-events that are happening in the window.
+The following example callback function, when run within the event loop, 
+prints information to the console about the events that are happening in the window.
 
 This could be a good place to start if developing code from scratch.
 
@@ -25,7 +25,9 @@ This could be a good place to start if developing code from scratch.
 ```{r setup, eval = FALSE}
 library(eventloop)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global variables to keep some state information between calls
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 last_x <- NA
 last_y <- NA
 
@@ -43,6 +45,8 @@ last_y <- NA
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -76,7 +80,7 @@ verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
     
     # "Handle" the event by printing to console
     co <- sprintf("[%.2f, %.2f]", mouse_x, mouse_y)
-    if (event$type %in% c('mouse_down', 'mouse_up')) {
+    if (event$type %in% c('mouse_down', 'mouse_up', 'mouse_move')) {
       cat(co, "Mouse: ", event$type, " - button: ", event$button, "\n")
     } else if (event$type == 'mouse_move') {
       cat(co, "Move \n")
@@ -87,6 +91,8 @@ verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
 }
 
 
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 eventloop::run_loop(verbose, fps_target = 10, show_fps = TRUE)
 ```

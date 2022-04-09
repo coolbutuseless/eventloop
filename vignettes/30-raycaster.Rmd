@@ -16,6 +16,23 @@ knitr::opts_chunk$set(
 
 
 
+
+## A simple raycaster engine in R
+
+Navigate a "3d" environment using the cursor keys.
+
+This is more a demonstrtion of what's possible - rather than an 
+instructive example on how to write a raycast engine.
+
+## Controls
+
+* Navigage with LEFT, RIGHT, UP, DOWN cursor keys
+* Press ESC to quit
+
+
+
+
+
 ```{r setup, eval = FALSE}
 library(eventloop)
 library(grid)
@@ -262,6 +279,8 @@ angle <- 0
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -301,9 +320,11 @@ wolf <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
   
 }
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 eventloop::run_loop(wolf, fps_target = 30)
-
-
 ```
 
 

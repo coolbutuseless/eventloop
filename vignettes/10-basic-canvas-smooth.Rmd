@@ -14,15 +14,20 @@ knitr::opts_chunk$set(
 )
 ```
 
-## A simple drawing canvas
 
-* Left mouse is used to active drawing mode
-* Pressing SPACE will clear the canvas
-* extra logic is used to store prior coordinates in the global state so 
+## A simple pixel-based drawing canvas
+
+Draw lines as the mouse moves.
+
+Extra logic is used to store prior coordinates so 
   that the output is a continuous line when drawing
 
-## Event Loop Considerations
 
+## Controls
+
+* Press and hold the left mouse button to draw
+* Press SPACE to clear the canvas
+* Press ESC to quit
 
 
 ```{r setup, eval=FALSE}
@@ -39,14 +44,6 @@ last_y  <- NA
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' The main 'draw' function called within the eventloop
-#' 
-#' Press ESC to quit.
-#'
-#' If 'event' is not NULL, then it means that the user interacted with the
-#' display.  The following events have an effect on the canvas:
-#'  - hold mouse to set drawing mode
-#'  - releasing the mouse button stops drawing mode
-#'  - pressing SPACE clears the canvas
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -55,6 +52,8 @@ last_y  <- NA
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -101,14 +100,11 @@ draw <- function(event, mouse_x, mouse_y, ...) {
     last_x <<- mouse_x
     last_y <<- mouse_y
   }
-  
-  
 }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Start the event loop.  
-# Press ESC to quit
+# Start the event loop. Press ESC to quit
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 eventloop::run_loop(draw, fps_target = NA, double_buffer = FALSE)
 ```

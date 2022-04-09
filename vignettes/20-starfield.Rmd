@@ -14,6 +14,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+
+## A whirling starfield
+
+Draw a rotating and expanding starfield
+
+## Controls
+
+* Move the mouse to control the centre of the starfield
+* Press ESC to quit
+
+
 ```{r setup, eval = FALSE}
 library(eventloop)
 library(grid)
@@ -28,8 +40,6 @@ ys <- runif(1000)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Draw a rotating/expanding starfield where the spawn point follows the mouse
-#' 
-#' Press ESC to quit.
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -38,6 +48,8 @@ ys <- runif(1000)
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -87,8 +99,7 @@ starfield <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Start an interactive render loop around this function
-# Note: Your OS must support this device:  x11(type = 'dbcairo')
+# Start the event loop. Press ESC to quit
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 run_loop(starfield, fps_target = NA)
 ```

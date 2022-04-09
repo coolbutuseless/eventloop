@@ -84,19 +84,18 @@ This package does *not* work on windows.
 
 ## ToDo before release:
 
-* Settle on the nomencalture:
-    * Use `callback` of `callback function` to refer to the user function.
-    * e.g. `the callback function is run`
-    * e.g. `the user-supplied callback function`
 * Re-add 'mouse-move' to documentation for events
-* Vignettes
-    * Reactive updates vs Continual updates
-    * Consistent documentation across all vignettes i.e. same headings
-    * Instructions for each vignette on what each key/mouse move does
-* Be able to set the initial canvas colour?
 
 
 ## List of Vignettes with a brief description
+
+#### Simple vignettes
+
+#### Easy Apps
+
+#### Intermediate Apps
+
+#### Complex Apps
 
 
 ## Installation 

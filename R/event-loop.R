@@ -267,6 +267,9 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'                \item{\code{event$type = 'mouse_up'} indicates a mouse button
 #'                      was released. \code{event$button} gives the integer
 #'                      index of the button.}
+#'                \item{\code{event$type = 'mouse_move'} indicates the mouse
+#'                      was moved. \code{event$button} gives the integer
+#'                      index of the button being pressed}
 #'                \item{\code{event$type = 'key_press'} indicates a key was pressed
 #'                      on the keyboard. \code{event$char} holds the character as
 #'                      a string value. \code{event$int} holds the integer
@@ -306,6 +309,7 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #' @return This function returns only when the user presses \code{ESC} within
 #'         the window, or some other terminating condition occurs.
 #'
+#' @importFrom methods formalArgs
 #' @import grDevices
 #' @import graphics
 #'

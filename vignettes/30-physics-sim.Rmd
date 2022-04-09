@@ -14,6 +14,19 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+
+## Realtime physics simulation
+
+Simulate the movement of 2d balls.
+
+
+## Controls
+
+* Click mouse to add new balls to the scene
+* Press ESC to quit
+
+
 ```{r setup}
 library(grid)
 library(eventloop)
@@ -62,8 +75,6 @@ for (i in 1:10) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Simulate physics of the balls i nthe sphere. Add new balls when mouse 
 #' is clicked
-#' 
-#' Press ESC to quit.
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -72,6 +83,8 @@ for (i in 1:10) {
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -115,7 +128,10 @@ sim <- function(event, mouse_x, mouse_y, ...) {
   )
 }
 
-do_nothing <- function(...) {NULL}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 eventloop::run_loop(sim, width = 7, height = 7, show_fps = TRUE, fps_target = 30)
 ```
 

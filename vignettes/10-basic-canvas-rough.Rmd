@@ -14,14 +14,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-## A simple drawing canvas
+## A simple pixel-based drawing canvas
 
-* Left mouse is used to active drawing mode
-* Pressing SPACE will clear the canvas
+Draw circles as the mouse moves.
 
 
-## Event Loop Considerations
+## Controls
 
+* Press and hold the left mouse button to draw
+* Press SPACE to clear the canvas
+* Press ESC to quit
 
 
 ```{r setup, eval=FALSE}
@@ -36,14 +38,6 @@ drawing <- FALSE
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' The main 'draw' function called within the event loop
-#' 
-#' Press ESC to quit.
-#'
-#' If 'event' is not NULL, then it means that the user interacted with the
-#' display.  The following events have an effect on the canvas:
-#'  - hold mouse to set drawing mode
-#'  - releasing the mouse button stops drawing mode
-#'  - pressing SPACE clears the canvas
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -52,6 +46,8 @@ drawing <- FALSE
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string

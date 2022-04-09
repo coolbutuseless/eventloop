@@ -18,13 +18,13 @@ knitr::opts_chunk$set(
 
 * Left mouse is used to active drawing mode
 * Pressing SPACE will clear the canvas
-* Adjust drawing mode with PLUS and MINUS for size, 0-9 for colour and 
-  'm' for drawing object
+* Adjust drawing mode with 
+    * PLUS and MINUS for size, 
+    * 0-9 for colour and 
+    * 'm' for drawing object
 * extra logic is used to store prior coordinates in the global state so 
   that the output is a continuous line when drawing
 * drawing elements are then repeated in 4 quadrants
-
-## Event Loop Considerations
 
 
 
@@ -48,17 +48,6 @@ colour   <- colours[[1]]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' The main 'draw' function 
-#' 
-#' Press ESC to quit.
-#'
-#' If 'event' is not NULL, then it means that the user interacted with the
-#' display.  The following events have an effect on the canvas:
-#'  - hold mouse to set drawing mode
-#'  - releasing the mouse button stops drawing mode
-#'  - pressing SPACE clears the canvas
-#'  - +/- changs the size of the object drawn
-#'  - 'm' changes the type ofelement drawn
-#'  - 0-9 changes the drawing colour
 #'
 #' @param event The event from the graphics device. Is NULL when no event
 #'        occurred.  Otherwise has `type` element set to:
@@ -67,6 +56,8 @@ colour   <- colours[[1]]
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string

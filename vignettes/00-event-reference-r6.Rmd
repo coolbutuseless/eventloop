@@ -16,8 +16,8 @@ knitr::opts_chunk$set(
 
 ## Event Reference Example - R6
 
-The following example just prints information to the console about the 
-events that are happening in the window.
+The following example callback function, when run within the event loop, 
+prints information to the console about the events that are happening in the window.
 
 Instead of using global variables to store state information
 (as in all the other vignettes),  variables to be retained are stored 
@@ -46,6 +46,8 @@ library(eventloop)
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -107,7 +109,7 @@ Agent <- R6::R6Class(
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Create the 'Agent' object and run the loop
+# Create the 'Agent' object and start the event loop. Press ESC to quit.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 agent <- Agent$new()
 eventloop::run_loop(agent$update, fps_target = 10, show_fps = TRUE)

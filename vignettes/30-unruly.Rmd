@@ -25,11 +25,16 @@ library(ggplot2)
 
 **Unruly** is a puzzle from [Simon Tatham's Puzzle Collection](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/unruly.html).
 
+
 In a square grid of pixels coloured only white or black, fill in any empty 
 spaces with a tile such that:
 
 * no three consecutive squares, horizontally or vertically, are the same colour
 * each row and column contains the same number of black and white squares
+
+Please the [javascript version of this game](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/unruly.html)
+to get a real idea on how the game works.
+
 
 Below is an image of the initial puzzle state for an 8x8 game (left), and
 the solution to this puzzle (right).
@@ -370,6 +375,8 @@ history <- list()      # Use a simple LIFO queue so the user has unlimited UNDO
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -382,7 +389,7 @@ history <- list()      # Use a simple LIFO queue so the user has unlimited UNDO
 #' @param dev_width,dev_height the width and height of the output device. Note:
 #'        this does not cope well if you resize the window
 #' @param ... any extra arguments ignored
-#' #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 unruly <- function(event, mouse_x, mouse_y, ...) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -439,6 +446,9 @@ unruly <- function(event, mouse_x, mouse_y, ...) {
 }
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 eventloop::run_loop(unruly, double_buffer = FALSE)
 ```
 

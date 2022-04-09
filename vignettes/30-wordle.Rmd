@@ -165,6 +165,8 @@ wordnum <- 1   # which attempt?
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
@@ -226,14 +228,11 @@ wordle <- function(event, ...) {
       grid.text(label = "Failed!", gp = gpar(col = 'red', cex = 5))
     }
   }
-
-  
 }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Since we are only drawing in response to user input, we can do without 
-# a double buffered display
+# Start the event loop. Press ESC to quit
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 eventloop::run_loop(wordle, double_buffer = FALSE)
 ```

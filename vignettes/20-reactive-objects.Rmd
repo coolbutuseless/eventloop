@@ -14,6 +14,24 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+
+
+## A block-based drawing canvas
+
+Draw blocks as the mouse moves.
+
+Extra logic is used to "decay" the size of the blocks depending upon
+how long it has been since the mouse was near.
+
+
+## Controls
+
+* Press ESC to quit
+
+
+
+
 ```{r setup, eval=FALSE}
 library(eventloop)
 library(grid)
@@ -21,10 +39,8 @@ library(viridisLite)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Data.frame of point (x,y) r, fill information
+# Global data encapsulating the state of the board
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-library(grid)
-
 N <- 33
 r <- 1/N/2
 decay    <- 0.004
@@ -36,24 +52,22 @@ points <- expand.grid(
   scale = min_size
 )
 
-# points$fill <- sample(viridisLite::cividis(20), nrow(points), replace = TRUE)
 points$fill <- viridisLite::magma(nrow(points))
-
 scale <- rep(min_size, nrow(points))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Activate points within the board when the mouse is near
 #' 
-#' Press ESC to quit.
-#'
-#' @param event The event from the graphics device. Is NULL when no event
+#' Press ESC to quit. event
 #'        occurred.  Otherwise has `type` element set to:
 #'        `event$type = 'mouse_down'` 
 #'               - an event in which a mouse button was pressed
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
