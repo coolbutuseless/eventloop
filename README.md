@@ -7,6 +7,7 @@
 
 ![](https://img.shields.io/badge/cool-useless-green.svg)
 ![](https://img.shields.io/badge/dependencies-zero-blue.svg)
+[![R-CMD-check](https://github.com/coolbutuseless/eventloop/workflows/R-CMD-check/badge.svg)](https://github.com/coolbutuseless/eventloop/actions)
 <!-- badges: end -->
 
 The `{eventloop}` package provides a framework for rendering interactive
@@ -146,7 +147,7 @@ eventloop::run_loop(draw, fps_target = NA, double_buffer = TRUE)
 
 Notes:
 
--   Every time the callback function (`draw()`) is executed from within
+-   Every time the callback function `draw()` is executed from within
     the event loop, it draws a line from the last mouse position to the
     current mouse position.
 -   The position of the mouse during the previous call is saved manually
@@ -164,16 +165,16 @@ illustrate how the interactive nature of these applications work.
 
 All examples are written in plain R using the `{eventloop}` package.
 
-|                                                                                                                                                                                  |                                                                                                                                                                                  |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Verbose example <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html)       | [Example with R6 <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html)           |
-| [Grid-based drawing <br/><img src="man/figures/gallery/grid-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)    | [Point-based drawing <br/><img src="man/figures/gallery/point-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html) |
-| [Line-based drawing <br/><img src="man/figures/gallery/line-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)  | [Animated Starfield <br/><img src="man/figures/gallery/starfield.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)             |
-| [Streaming plot data <br/><img src="man/figures/gallery/plot-stream.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)           | [Game of Life <br/><img src="man/figures/gallery/game-of-life.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)             |
-| [Reactive objects <br/><img src="man/figures/gallery/reactive-small.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)   | [Kaleidoscope <br/><img src="man/figures/gallery/spirograph.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)                 |
-| [Asteroids<br/><img src="man/figures/gallery/asteroids.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)                      | [Physics Simulation <br/><img src="man/figures/gallery/physics.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)             |
-| [Raycast ‘Wolfenstein’ 3d engine <br/><img src="man/figures/gallery/raycast.png" width="89%"  />](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html) | [‘Unruly’ Puzzle <br/><img src="man/figures/gallery/unruly.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)                      |
-| [Wordle <br/><img src="man/figures/gallery/wordle.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)                               |                                                                                                                                                                                  |
+|                                                                                                                                                                                      |                                                                                                                                                                                          |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Grid-based drawing <br/><img src="man/figures/gallery/grid-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)        | [Point-based drawing <br/><img src="man/figures/gallery/point-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html)         |
+| [Line-based drawing <br/><img src="man/figures/gallery/line-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)      | [Animated Starfield <br/><img src="man/figures/gallery/starfield.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)                     |
+| [Streaming plot data <br/><img src="man/figures/gallery/plot-stream.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)               | [Game of Life <br/><img src="man/figures/gallery/game-of-life.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)                     |
+| [Reactive objects <br/><img src="man/figures/gallery/reactive-small.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)       | [Kaleidoscope <br/><img src="man/figures/gallery/spirograph.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)                         |
+| [Asteroids<br/><img src="man/figures/gallery/asteroids.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)                          | [Physics Simulation <br/><img src="man/figures/gallery/physics.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)                     |
+| [Raycast ‘Wolfenstein’ 3d engine <br/><img src="man/figures/gallery/raycast.png" width="89%"  />](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html)     | [‘Unruly’ Puzzle <br/><img src="man/figures/gallery/unruly.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)                              |
+| [Wordle <br/><img src="man/figures/gallery/wordle.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)                                   |                                                                                                                                                                                          |
+| [Verbose debugging example <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html) | [Verbose debugging example with R6 <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html) |
 
 ## Tech bits: What is an event loop?
 
