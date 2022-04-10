@@ -155,49 +155,23 @@ Notes:
     button is currently pressed or not. Changes to the screen only
     happend if `drawing == TRUE`.
 
-## Gallery of Applications
+## Gallery of Puzzles, Games + Applications implemented in the vignettes
 
-#### Illustrative Examples
+**Click an image to view the code/vignette**
 
--   [Verbose illustrative
-    example](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html)
--   [Verbose illustrative example using R6 to store global
-    state](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html)
+#### Illustrative Verbose Examples
 
-#### Basic Drawing Apps
-
--   [Grid-based
-    drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)
--   [Point-based
-    drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html)
--   [Line-based
-    drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)
-
-#### Easy applications
-
--   [Streaming plot
-    data](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)
--   [Game of
-    Life](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)
-
-#### Medium complextiy applications
-
--   [Reactive
-    objects](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)
--   [Spirograph](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)
--   [Animated
-    Starfield](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)
-
-#### Complex Puzzles + Games
-
--   [Asteroids](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)
--   [Physics
-    Simulation](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)
--   [Raycast ‘Wolfenstein’ 3d
-    engine](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html)
--   [‘Unruly’
-    Puzzle](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)
--   [Wordle](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)
+|                                                                                                                                                                     |                                                                                                                                                                      |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Verbose illustrative example](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html)                                          | [Verbose illustrative example using R6 to store global state](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html)                |
+| [Grid-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html) <br/><img src="man/figures/gallery/grid-based.png" />   | [Point-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html) <br/><img src="man/figures/gallery/point-based.png" /> |
+| [Line-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html) <br/><img src="man/figures/gallery/line-based.png" /> |                                                                                                                                                                      |
+| [Streaming plot data](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)                                                                 | [Game of Life](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)                                                                     |
+| [Reactive objects](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)                                                            | [Spirograph](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)                                                                         |
+| [Animated Starfield](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)                                                                 |                                                                                                                                                                      |
+| [Asteroids](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)                                                                         | [Physics Simulation](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)                                                                |
+| [Raycast ‘Wolfenstein’ 3d engine](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html)                                                    | [‘Unruly’ Puzzle](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)                                                                        |
+| [Wordle](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)                                                                                |                                                                                                                                                                      |
 
 ## Tech bits: What is an event loop?
 
@@ -220,9 +194,9 @@ When there is no event occuring, another function is called
 continuously. This function is the *‘onIdle’ event callback* and is only
 available in the `x11()` device on macOS and \*nix.
 
-The `{eventloop}` package orchestrates a user-supplied functino to act
-as the onIdle event callback, and in doing so it takes care of all the
-packing and unpacking of events into a more user-friendly form.
+The `{eventloop}` package orchestrates the events and window information
+into arguments to the user-supplied ‘onIdle’ function - calling this
+function over and over while the event loop is running.
 
 <img src="man/figures/event-handlers.png" />
 
