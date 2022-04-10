@@ -14,12 +14,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(grid)
-library(eventloop)
-```
-
-
 
 ## Realtime stream-based plotting
 
@@ -34,6 +28,9 @@ Plot new lines at every timestep as if drawing data from a sensor
 
 
 ```{r eval = FALSE}
+library(grid)
+library(eventloop)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Initialise a number of data streams
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

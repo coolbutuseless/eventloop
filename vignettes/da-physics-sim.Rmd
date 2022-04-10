@@ -27,7 +27,7 @@ Simulate the movement of 2d balls.
 * Press ESC to quit
 
 
-```{r setup}
+```{r setup, eval=FALSE}
 library(grid)
 library(eventloop)
 

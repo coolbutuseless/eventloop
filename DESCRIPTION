@@ -15,9 +15,6 @@ Imports:
     methods
 Suggests: 
     knitr,
-    rmarkdown,
-    grid,
-    viridisLite,
-    beepr,
-    ggplot2
+    ggplot2,
+    beepr
 VignetteBuilder: knitr
