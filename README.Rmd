@@ -234,7 +234,6 @@ while the event loop is running.
 <img src="man/figures/event-handlers.png" />
 
 
-
 ## Related Software
 
 * tcl/tk
