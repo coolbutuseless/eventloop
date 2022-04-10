@@ -15,11 +15,6 @@ knitr::opts_chunk$set(
 set.seed(1)
 ```
 
-```{r setup}
-library(grid)
-library(eventloop)
-library(ggplot2)
-```
 
 ## Introduction
 
@@ -62,7 +57,12 @@ Here I will generate all valid patterns for a sequence of 8 tiles.
 These rows of allowable patterns will be the core element used to build
 a random valid board state.
 
-```{r}
+```{r eval=FALSE}
+library(grid)
+library(eventloop)
+library(ggplot2)
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Generate a data.frame of all possible 0/1 values along a row-of-8 values
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,7 +90,7 @@ runs <- sample(runs)
 ```
 
 
-```{r echo = FALSE}
+```{r echo = FALSE,  eval=FALSE}
 
 mat <- do.call(rbind, runs[1:4])
 id0 <- as.data.frame(arrayInd(which(mat == 0), dim(mat)))
@@ -119,7 +119,7 @@ If ever the addition of a new row of tiles results in an invalid condition,
 remove that row and try a different one from the set of 34 valid rows.
 
 
-```{r}
+```{r eval=FALSE}
 N <- 8L
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -179,7 +179,7 @@ board <- create_board(board, 1, runs)
 
 #### The randomly generated board
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 board
 grid.raster(board, interpolate = FALSE)
 ```
@@ -191,7 +191,7 @@ grid.raster(board, interpolate = FALSE)
 * `is_solved()` checks the board is in a valid state and the board is complete
 
 
-```{r}
+```{r  eval=FALSE}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This is a fully featured "Board is in a valid state" check.  
 # This check allows for NA elements where the board state has not yet been
@@ -226,7 +226,7 @@ is_solved <- function(board) {
 
 
 
-```{r}
+```{r eval=FALSE}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Take the known solution and blank 08t 60% of the board
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -260,7 +260,7 @@ idx <- rep(seq(1:9), each = 2)
 
 
 
-```{r}
+```{r eval=FALSE}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Draw a game board

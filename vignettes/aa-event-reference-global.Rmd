@@ -22,7 +22,7 @@ prints information to the console about the events that are happening in the win
 This could be a good place to start if developing code from scratch.
 
 
-```{r setup, eval = FALSE}
+```{r eval = FALSE}
 library(eventloop)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
