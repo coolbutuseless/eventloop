@@ -44,6 +44,15 @@ monitoring for keyboard+mouse events.  In every spare moment, a
 user-defined function will be called with the latest event details.   Within
 this function the user can process events and update the display.
 
+# ToDo before release
+
+* tidy 'unruly' vignette
+* tidy imports in DESCRIPTION - remove beepr and ggplot to reduce the 
+  dependency load
+* Make this small enough for cran
+    * PNG crush all images
+    * Hide some vignettes from CRAN/GITHUB and save for pkgdown site only.
+    * Replace some mp4s with just PNGs, and link to mp4s on documentation site.
 
 ## Supported Platforms
 
