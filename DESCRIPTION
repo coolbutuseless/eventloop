@@ -15,6 +15,7 @@ Imports:
     methods
 Suggests: 
     knitr,
+    rmarkdown,
     ggplot2,
     beepr
 VignetteBuilder: knitr
