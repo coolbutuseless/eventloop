@@ -32,7 +32,7 @@ spaces with a tile such that:
 * no three consecutive squares, horizontally or vertically, are the same colour
 * each row and column contains the same number of black and white squares
 
-Please the [javascript version of this game](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/unruly.html)
+Please visit the [online javascript version of this game](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/unruly.html)
 to get a real idea on how the game works.
 
 
