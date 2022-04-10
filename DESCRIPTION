@@ -1,11 +1,12 @@
 Package: eventloop
 Type: Package
-Title: Event Loop for MacOS
+Title: Event Loop for Interactive Realtime Rendering
 Version: 0.1.0
 Author: mikefc
 Maintainer: mikefc <mikefc@coolbutuseless.com>
-Description: An event loop for macOS running in XQuartz with keyboard and mouse
-    events.
+Description: An event loop with non-blocking keyboard and mouse
+    events.  This is only possible on graphics devices which support the
+    'onIdle' callback i.e. x11() devices on macOS and *nux.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

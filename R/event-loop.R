@@ -378,9 +378,14 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
   # This wrapped version of the users callback is then the 'onIdle'
   # callback in the event handler
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  onIdle <- gen_onIdle(user_func, fps_target = fps_target,
-                       show_fps = show_fps, this_dev = this_dev,
-                       double_buffer = double_buffer, verbose = verbose)
+  onIdle <- gen_onIdle(
+    user_func,
+    fps_target    = fps_target,
+    show_fps      = show_fps,
+    this_dev      = this_dev,
+    double_buffer = double_buffer,
+    verbose       = verbose
+  )
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Set up the events on this device

@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 
+library(dplyr)
 library(eventloop)
 
 
@@ -29,96 +30,39 @@ if (FALSE) {
 
 <!-- badges: start -->
 ![](https://img.shields.io/badge/cool-useless-green.svg)
+![](https://img.shields.io/badge/dependencies-zero-blue.svg)
 <!-- badges: end -->
 
 The `{eventloop}` package provides a framework for rendering interactive graphics 
 and handling mouse+keyboard events from the user at speeds fast enough to be 
 considered interesting for games and other realtime applications.
 
-[gameprogrammingpatterns.com](https://www.gameprogrammingpatterns.com/game-loop.html) 
-defines an event loop (also known as a *game loop*) as follows:
 
-    A game loop runs continuously during gameplay. Each turn of the loop, it 
-    processes user input without blocking, updates the game state, and renders 
-    the game. It tracks the passage of time to control the rate of gameplay.
-
-
-The `{eventloop}` package takes care of monitoring for keyboard+mouse events, 
-and the user supplies another function to determine what happens with that input,
-and what gets drawn to the screen.
+The `{eventloop}` package takes care of setting up an `x11()` window  with 
+monitoring for keyboard+mouse events.  In every spare moment, a 
+user-defined function will be called with the latest event details.   Within
+this function the user can process events and update the display.
 
 
+## Supported Platforms
 
-#### NOTE: Windows does not support the device features needed to use this package
+```{r echo=FALSE}
+dplyr::tibble(
+  System = c('macOS', '*nix', 'windows'),
+  "x11() device has 'onIdle()' event callback" = c('Yes', 'Yes', 'No'),
+  "Supported in {eventloop}" = c('✅Yes', '✅Yes', '❌ No')
+ ) %>%
+  knitr::kable()
+```
 
-Only the `x11()` device on macOS and *nix platforms includes the support
-for events which are necessary for `eventloop` to work.
+Notes:
 
-This package does *not* work on windows.
-
-
-
-#### Overview of Process
-
-* The user defines a callback function that is run repeatedly by the system.
-* If a user interaction has happened within the graphics device, then the
-  `event` variable (passed to the callback function) will be non-NULL and 
-  contain details of the event.
-* The user may choose to handle some, none or all different event types in 
-  order to change the state of some global variables.
-* The user may also choose what new things (if any) are drawn to the graphics
-  device each time the function is called.
-  
-#### Tips
-
-* If your screen only updates sporadically (e.g. a chess game), then it could
-  be appropriate to set `double_buffer = FALSE` to avoid the mouse pointer 
-  flickering.
-* For fast screen updates, set `double_buffer = TRUE`.  This will (unavoidably) 
-  cause the mouse pointer to flicker, but overall the updates will be smoother.
-* Set a limit on how often your function gets called by setting `fps_target = [integer]`
-  to be the number of times to call this function every second (if this frame rate is 
-  possible to achieve).
-* To run your function as fast as possible, set `fps_target = NA`
-
-
-## ToDo before release:
-
-* Re-add 'mouse-move' to documentation for events
-
-
-## List of Vignettes with a brief description
-
-#### Illustrative Examples
-
-* [Verbose illustrative example](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html)
-* [Verbose illustrative example using R6 to store global state](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html)
-
-#### Basic Drawing Apps
-
-* [Grid-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)
-* [Point-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html)
-* [Line-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)
-
-#### Easy applications
-
-* [Streaming plot data](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)
-* [Game of Life](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)
-
-#### Medium complextiy applications
-
-* [Reactive objects](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)
-* [Spirograph](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)
-* [Animated Starfield](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)
-
-
-#### Complex Puzzles + Games
-
-* [Asteroids](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)
-* [Physics Simulation](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)
-* [Raycast 'Wolfenstein' 3d engine](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html)
-* ['Unruly' Puzzle](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)
-* [Wordle](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)
+* windows `x11()` device does not support `onIdle` callback and hence this 
+  package does not work on windows
+* macOS `x11()` support via [Xquartz](https://www.xquartz.org/) may slow to 
+  a crawl after running for a while.  You will need to logout-and-log-back in, 
+  or restart your machine to regain full speed.   This is an R/Xquartz bug, 
+  but I'm not sure where exactly.
 
 
 ## Installation 
@@ -131,26 +75,21 @@ remotes::install_github('coolbutuseless/eventloop')
 
 ## Example - Basic Drawing app
 
-The following is a basic application which allows the user to draw lines 
-with the mouse.
+This is a basic application which lets the user draw in 
+a window using the mouse.
 
-Every time the callback function (`draw()`) is executed from within the event loop, 
-it draws a line from the last mouse position to the current mouse position.
 
-The position of the mouse during the previous call is saved manually using global variables. 
-
-A boolean variable (`drawing`) is used to note whether the mouse button 
-is currently pressed or not.  Changes to the screen only happend if `drawing == TRUE`.
-
-```{eval = FALSE}
+```{r, eval = FALSE}
 library(grid)
 library(eventloop)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up the global variables which store the state of the world
-#  'drawing' = Is the mouse button currently pressed?
+#  'drawing'      = Is the mouse button currently pressed?
 #  last_x/last_y  = the last mouse position is manually saved every time
 #                 the callback function runs.
+#
+# These values will be updated manually by the user in the `draw()` function
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 drawing <- FALSE
 last_x  <- NA
@@ -236,17 +175,75 @@ eventloop::run_loop(draw, fps_target = NA, double_buffer = TRUE)
 
 <img src="man/figures/hello-r.gif" />
 
+Notes:
 
-## Example - Raycaster
+* Every time the callback function (`draw()`) is executed from within the event loop,  it draws a line from the last mouse position to the current mouse position.
+* The position of the mouse during the previous call is saved manually using global variables. 
+* A boolean variable (`drawing`) is used to note whether the mouse button 
+is currently pressed or not.  Changes to the screen only happend if `drawing == TRUE`.
 
-If the code in your callback function can run fast enough in R, 
-then you can do some more complex rendering.
 
-Here's a simple raycaster in plain R.
+## Gallery of Applications
 
-See [vignette](https://coolbutuseless.github.io/package/eventloop/articles/raycaster.html) for code for this example.
+#### Illustrative Examples
 
-<img src="man/figures/raycaster.gif" />
+* [Verbose illustrative example](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html)
+* [Verbose illustrative example using R6 to store global state](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html)
+
+#### Basic Drawing Apps
+
+* [Grid-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)
+* [Point-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html)
+* [Line-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)
+
+#### Easy applications
+
+* [Streaming plot data](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)
+* [Game of Life](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)
+
+#### Medium complextiy applications
+
+* [Reactive objects](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)
+* [Spirograph](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)
+* [Animated Starfield](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)
+
+
+#### Complex Puzzles + Games
+
+* [Asteroids](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)
+* [Physics Simulation](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)
+* [Raycast 'Wolfenstein' 3d engine](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html)
+* ['Unruly' Puzzle](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)
+* [Wordle](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)
+
+
+## Tech bits: What is an event loop?
+
+
+[gameprogrammingpatterns.com](https://www.gameprogrammingpatterns.com/game-loop.html) 
+defines an event loop (also known as a *game loop*) as follows:
+
+    A game loop runs continuously during gameplay. Each turn of the loop, it 
+    processes user input without blocking, updates the game state, and renders 
+    the game. It tracks the passage of time to control the rate of gameplay.
+
+## Tech bits: How is the event loop implemented in R?
+
+Graphics windows in R can have *event handlers* attached which instruct the
+device to run a function when a certain event occurs.
+
+When a mouse or keyboard event occurs, `{eventloop}` stores the event in 
+an environment for later access.
+
+When there is no event occuring, another function is called continuously.  This
+function is the *'onIdle' event callback* and is only available in the `x11()` 
+device on macOS and *nix.
+
+The `{eventloop}` package orchestrates a user-supplied functino to act 
+as the onIdle event callback, and in doing so it takes care of all the 
+packing and unpacking of events into a more user-friendly form.
+
+<img src="man/figures/event-handlers.png" />
 
 
 
