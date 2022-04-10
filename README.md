@@ -21,11 +21,11 @@ Within this function the user can process events and update the display.
 
 ## Supported Platforms
 
-| System  | x11() device has ‘onIdle()’ event callback | Supported in {eventloop} |
-|:--------|:-------------------------------------------|:-------------------------|
-| macOS   | Yes                                        | ✅Yes                    |
-| \*nix   | Yes                                        | ✅Yes                    |
-| windows | No                                         | ❌ No                    |
+| System  | x11() device has ‘onIdle()’ event callback | System supported in {eventloop} |
+|:--------|:-------------------------------------------|:--------------------------------|
+| macOS   | ✅Yes                                      | ✅Yes                           |
+| \*nix   | ✅Yes                                      | ✅Yes                           |
+| Windows | ❌ No                                      | ❌ No                           |
 
 Notes:
 
@@ -170,7 +170,7 @@ All examples are written in plain R using the `{eventloop}` package.
 | [Grid-based drawing <br/><img src="man/figures/gallery/grid-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)    | [Point-based drawing <br/><img src="man/figures/gallery/point-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html) |
 | [Line-based drawing <br/><img src="man/figures/gallery/line-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)  | [Animated Starfield <br/><img src="man/figures/gallery/starfield.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)             |
 | [Streaming plot data <br/><img src="man/figures/gallery/plot-stream.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)           | [Game of Life <br/><img src="man/figures/gallery/game-of-life.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)             |
-| [Reactive objects <br/><img src="man/figures/gallery/reactive-small.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)   | [Spirograph <br/><img src="man/figures/gallery/spirograph.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)                   |
+| [Reactive objects <br/><img src="man/figures/gallery/reactive-small.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)   | [Kaleidoscope <br/><img src="man/figures/gallery/spirograph.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)                 |
 | [Asteroids<br/><img src="man/figures/gallery/asteroids.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)                      | [Physics Simulation <br/><img src="man/figures/gallery/physics.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)             |
 | [Raycast ‘Wolfenstein’ 3d engine <br/><img src="man/figures/gallery/raycast.png" width="89%"  />](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html) | [‘Unruly’ Puzzle <br/><img src="man/figures/gallery/unruly.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)                      |
 | [Wordle <br/><img src="man/figures/gallery/wordle.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)                               |                                                                                                                                                                                  |

@@ -1,8 +1,8 @@
 ---
-title: "Spirograph"
+title: "Kaleidoscope"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Spirograph}
+  %\VignetteIndexEntry{Kaleidoscope}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-## A Four-fold symmetric spirograph drawing application
+## A Four-fold symmetric kaleidoscope drawing application
 
 * Left mouse is used to active drawing mode
 * Pressing SPACE will clear the canvas
