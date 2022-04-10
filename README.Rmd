@@ -89,13 +89,36 @@ This package does *not* work on windows.
 
 ## List of Vignettes with a brief description
 
-#### Simple vignettes
+#### Illustrative Examples
 
-#### Easy Apps
+* [Verbose illustrative example](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html)
+* [Verbose illustrative example using R6 to store global state](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html)
 
-#### Intermediate Apps
+#### Basic Drawing Apps
 
-#### Complex Apps
+* [Grid-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)
+* [Point-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html)
+* [Line-based drawing](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)
+
+#### Easy applications
+
+* [Streaming plot data](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html)
+* [Game of Life](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html)
+
+#### Medium complextiy applications
+
+* [Reactive objects](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html)
+* [Spirograph](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html)
+* [Animated Starfield](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html)
+
+
+#### Complex Puzzles + Games
+
+* [Asteroids](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html)
+* [Physics Simulation](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html)
+* [Raycast 'Wolfenstein' 3d engine](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html)
+* ['Unruly' Puzzle](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html)
+* [Wordle](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html)
 
 
 ## Installation 
@@ -153,6 +176,8 @@ last_y  <- NA
 #'               - `event$button` gives the index of the button
 #'        `event$type = 'mouse_up'`   
 #'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
 #'               - `event$char` holds the character as string
