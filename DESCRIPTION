@@ -19,10 +19,5 @@ Suggests:
     grid,
     viridisLite,
     beepr,
-    chipmunkbasic,
-    chipmunkcore,
     ggplot2
 VignetteBuilder: knitr
-Remotes:
-    coolbutuseless/chipmunkbasic
-    coolbutuseless/chipmunkcore
