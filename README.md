@@ -207,6 +207,7 @@ function over and over while the event loop is running.
 
 -   tcl/tk
 -   other GUI toolkits
+-   rpanel
 -   shiny
 -   documentation for `grid.locate()`
 
