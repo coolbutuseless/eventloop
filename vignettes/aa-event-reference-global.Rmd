@@ -81,7 +81,7 @@ verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
     # "Handle" the event by printing to console
     co <- sprintf("[%.2f, %.2f]", mouse_x, mouse_y)
     if (event$type %in% c('mouse_down', 'mouse_up', 'mouse_move')) {
-      cat(co, "Mouse: ", event$type, " - button: ", event$button, "\n")
+      cat(co, "Mouse: ", event$type, " - button: [", event$button, "] ", class(event$button), length(event$button), "\n")
     } else if (event$type == 'mouse_move') {
       cat(co, "Move \n")
     } else if (event$type == 'key_press') {
