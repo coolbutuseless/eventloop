@@ -69,13 +69,22 @@ Notes:
 
 * windows `x11()` device does not support `onIdle` callback and hence this 
   package does not work on windows
-* macOS `x11()` support via [Xquartz](https://www.xquartz.org/) may slow to 
+* macOS `x11()` support is via [Xquartz](https://www.xquartz.org/).  Xquartz may slow to 
   a crawl after running for a while.  You will need to logout-and-log-back in, 
-  or restart your machine to regain full speed.   This is an R/Xquartz bug, 
-  but I'm not sure where exactly.
+  or restart your machine to regain full speed.   This bug may be in Xquartz
+  or how x11() support is implemented in macOS - I'm really not sure.
 
 
 ## Installation 
+
+Pre-requisites
+
+* Unix-like systems
+    * R compiled with X11() support
+* macOS
+    * [Xquartz](https://www.xquartz.org/) installed
+* windows
+    * Sorry, but R on windows does not support features needed for this package
 
 ``` r
 # install.package('remotes')

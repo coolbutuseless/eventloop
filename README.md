@@ -20,6 +20,18 @@ with monitoring for keyboard+mouse events. In every spare moment, a
 user-defined function will be called with the latest event details.
 Within this function the user can process events and update the display.
 
+# ToDo before release
+
+-   tidy ‘unruly’ vignette
+-   tidy imports in DESCRIPTION - remove beepr and ggplot to reduce the
+    dependency load
+-   Make this small enough for cran
+    -   PNG crush all images
+    -   Hide some vignettes from CRAN/GITHUB and save for pkgdown site
+        only.
+    -   Replace some mp4s with just PNGs, and link to mp4s on
+        documentation site.
+
 ## Supported Platforms
 
 | System  | x11() device has ‘onIdle()’ event callback | System supported in {eventloop} |
@@ -32,12 +44,23 @@ Notes:
 
 -   windows `x11()` device does not support `onIdle` callback and hence
     this package does not work on windows
--   macOS `x11()` support via [Xquartz](https://www.xquartz.org/) may
-    slow to a crawl after running for a while. You will need to
-    logout-and-log-back in, or restart your machine to regain full
-    speed. This is an R/Xquartz bug, but I’m not sure where exactly.
+-   macOS `x11()` support is via [Xquartz](https://www.xquartz.org/).
+    Xquartz may slow to a crawl after running for a while. You will need
+    to logout-and-log-back in, or restart your machine to regain full
+    speed. This bug may be in Xquartz or how x11() support is
+    implemented in macOS - I’m really not sure.
 
 ## Installation
+
+Pre-requisites
+
+-   Unix-like systems
+    -   R compiled with X11() support
+-   macOS
+    -   XQuartz() installed
+-   windows
+    -   Sorry, but R on windows not support features needed for this
+        package
 
 ``` r
 # install.package('remotes')
