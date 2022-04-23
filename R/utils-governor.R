@@ -16,14 +16,9 @@ fps_governor <- function(fps, fs) {
   .Call(fps_governor_, fps, fs)
 }
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' @rdname fps_governor
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 init_fps_governor <- function() {
   .Call(init_fps_governor_)
 }
-
-
 
 if (FALSE) {
 
@@ -37,5 +32,4 @@ if (FALSE) {
       }
     })
   })
-
 }
