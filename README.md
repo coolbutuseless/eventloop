@@ -57,10 +57,10 @@ Pre-requisites
 -   Unix-like systems
     -   R compiled with X11() support
 -   macOS
-    -   XQuartz() installed
+    -   [Xquartz](https://www.xquartz.org/) installed
 -   windows
-    -   Sorry, but R on windows not support features needed for this
-        package
+    -   Sorry, but R on windows does not support features needed for
+        this package
 
 ``` r
 # install.package('remotes')
