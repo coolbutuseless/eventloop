@@ -307,8 +307,15 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'        will flicker between a normal pointer and a busy pointer.
 #' @param verbose Show more debugging information. Default: FALSE
 #'
-#' @return This function returns only when the user presses \code{ESC} within
-#'         the window, or some other terminating condition occurs.
+#' @return None. This function returns nothing, and  only terminates when the user
+#'         presses \code{ESC} within the window, or some other terminating
+#'         condition occurs e.g. an error
+#'
+#' @examples
+#' if (interactive()) {
+#'   my_fun <- function(...) { cat(".") }
+#'   run_loop(my_fun)
+#' }
 #'
 #' @importFrom methods formalArgs
 #' @import grDevices

@@ -78,11 +78,19 @@ will flicker between a normal pointer and a busy pointer.}
 \item{verbose}{Show more debugging information. Default: FALSE}
 }
 \value{
-This function returns only when the user presses \code{ESC} within
-        the window, or some other terminating condition occurs.
+None. This function returns nothing, and  only terminates when the user
+        presses \code{ESC} within the window, or some other terminating
+        condition occurs e.g. an error
 }
 \description{
 Create a new \code{X11()} graphics device and setup event callbacks such
 that the user-supplied callback function is run with appropriate
 parameters at the specified rate.
+}
+\examples{
+if (interactive()) {
+  my_fun <- function(...) { cat(".") }
+  run_loop(my_fun)
+}
+
 }

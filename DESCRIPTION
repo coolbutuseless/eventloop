@@ -3,6 +3,9 @@ Type: Package
 Title: Event Loop for Interactive Realtime Rendering
 Version: 0.1.0
 Author: mikefc
+Authors@R: c(
+    person("Mike", "FC", email = "mikefc@coolbutuseless.com", role = c("aut", "cre", "cph"))
+  )
 Maintainer: mikefc <mikefc@coolbutuseless.com>
 Description: An event loop with non-blocking keyboard and mouse
     events.  This is only possible on graphics devices which support the
