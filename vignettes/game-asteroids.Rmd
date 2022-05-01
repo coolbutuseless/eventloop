@@ -1,0 +1,164 @@
+---
+title: "Asteroids"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Asteroids}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+
+## The 'Asteroids' arcade game
+
+Control a ship and avoid the asteroids!
+
+Note: No collision mechanism coded yet - so objects just pass through each other.
+
+## Controls
+
+* LEFT and RIGHT to rotate the ship
+* UP and DOWN to accelerate/decelerate the ship.
+* Press ESC to quit
+
+
+
+
+```{r setup, eval=FALSE}
+library(eventloop)
+library(grid)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Ship
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ship_poly_x <- unit(c(- 7,   7,  0), 'pt')
+ship_poly_y <- unit(c(-10, -10, 15), 'pt')
+
+angle <- 0
+xpos  <- 0.5
+ypos  <- 0.5
+xvel  <- 0
+yvel  <- 0
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Asteroid
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+asteroid_x <- unit(c(1, 1, 4, 3, 5, 9, 9, 7, 10, 8, 7, 4) - 5.6, 'pt') * 10
+asteroid_y <- unit(c(5, 7, 7, 9, 9, 8, 7, 5,  3, 1, 2, 1) - 5.3, 'pt') * 10
+
+Nasteroids <- 4; set.seed(1)
+asxpos <- runif(Nasteroids)
+asypos <- runif(Nasteroids)
+asxvel <- runif(Nasteroids)/200
+asyvel <- runif(Nasteroids)/200
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Update the positions of the asteroids and the users ship in the eventloop
+#' 
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$str` String describing which key was pressed. 
+#'                  See \code{grDevices::setGraphicsEventHandlers} for more information.
+#' @param mouse_x,mouse_y current location of mouse within window in normalised 
+#'        coordinates in the range [0, 1]. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num Current frame number (integer)
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+asteroids <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                         fps_target, dev_width, dev_height, ...) {
+  grid::grid.rect(gp = grid::gpar(fill = 'black'))
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Keyboard control Left/Right/Up
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.null(event) && event$type == 'key_press') {
+    if (event$str == 'Left') {
+      angle <<- angle + 8 * pi/180
+    } else if (event$str == 'Right') {
+      angle <<- angle - 8 * pi/180
+    } else if (event$str == 'Up') {
+      # TODO check if already at topspeed
+      at_max_speed <- FALSE
+      if (!at_max_speed) {
+        xvel <<- xvel + sin(-angle) / 1000
+        yvel <<- yvel + cos(-angle) / 1000
+      }
+    }
+  }
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Ship - Update position of the ship and then wrap in toroidal space
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  xpos <<- xpos + xvel
+  ypos <<- ypos + yvel
+  xpos <<- ifelse(xpos < 0, 1 + xpos, ifelse(xpos > 1, xpos - 1, xpos))
+  ypos <<- ifelse(ypos < 0, 1 + ypos, ifelse(ypos > 1, ypos - 1, ypos))
+
+  # Calc and draw new ship orientation + position
+  ship_x <- ship_poly_x * cos(angle) - ship_poly_y * sin(angle) + unit(xpos, 'npc')
+  ship_y <- ship_poly_y * cos(angle) + ship_poly_x * sin(angle) + unit(ypos, 'npc')
+  grid::grid.polygon(
+    x = ship_x,
+    y = ship_y,
+    gp = grid::gpar(fill = NA, col = 'white'),
+  )
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Asteroids - update the position of the asteroids, then wrap in toroidal space
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  asxpos <<- asxpos + asxvel
+  asypos <<- asypos + asyvel
+  asxpos <<- ifelse(asxpos < 0, 1 + asxpos, ifelse(asxpos > 1, asxpos - 1, asxpos))
+  asypos <<- ifelse(asypos < 0, 1 + asxpos, ifelse(asypos > 1, asypos - 1, asypos))
+
+  # Draw asteroids
+  for (i in seq(Nasteroids)) {
+    ast_x <- asteroid_x + unit(asxpos[i], 'npc')
+    ast_y <- asteroid_y + unit(asypos[i], 'npc')
+    grid::grid.polygon(
+      x = ast_x,
+      y = ast_y,
+      gp = grid::gpar(fill = NA, col = 'white'),
+    )
+  }
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+run_loop(asteroids)
+```
+
+
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
+<video controls>
+  <source src="images/asteroids.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+
+

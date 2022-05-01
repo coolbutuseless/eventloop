@@ -1,0 +1,17 @@
+articles:
+
+- title: Basic
+  navbar: Basic
+  contents: [verbose-example]
+
+- title: Drawing
+  navbar: Drawing
+  contents: [drawing-grid, drawing-lines]
+
+- title: Games
+  navbar: Games
+  contents: [game-asteroids, game-of-life, game-raycaster, game-tic-tac-toe, game-wordle]
+
+- title: Plotting
+  navbar: Plotting
+  contents: [stream-plotting]

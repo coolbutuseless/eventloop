@@ -1,0 +1,171 @@
+---
+title: "Verbose Example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Verbose Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Verbose Example
+
+The following code is a verbose eventloop callback which just prints the 
+information about the current event to the console.
+
+This could be a good place to start if developing code from scratch.
+
+
+```{r eval = FALSE}
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Global variables used to retain information between calls
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+last_x <- NA
+last_y <- NA
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' This is a verbose callback that prints information to the console
+#' about the latest event
+#' 
+#' Press ESC to quit.
+#' 
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$str` String describing which key was pressed. 
+#'                  See \code{grDevices::setGraphicsEventHandlers} for more information.
+#' @param mouse_x,mouse_y current location of mouse within window in normalised 
+#'        coordinates in the range [0, 1]. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num Current frame number (integer)
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+verbose <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                    fps_target, dev_width, dev_height, ...) {
+  
+  # Check if an mouse or keyboard event happened.
+  if (!is.null(event)) {
+    
+    # Draw a line from the last mouse position to the current position.
+    if (!is.na(last_x)) {
+      grid::grid.lines(
+        x = c(last_x, mouse_x),
+        y = c(last_y, mouse_y)
+      )
+    }
+    
+    # Keep track of latest mouse position in the global variables
+    last_x <<- mouse_x
+    last_y <<- mouse_y
+    
+    # "Handle" the event by printing to console
+    co <- sprintf("Screen [%i, %i] Mouse Loc: [%.2f, %.2f]", dev_width, dev_height, mouse_x, mouse_y)
+    if (event$type %in% c('mouse_down', 'mouse_up', 'mouse_move')) {
+      cat(co, "Mouse: ", event$type, " - button: [", event$button, "]\n")
+    } else if (event$type == 'mouse_move') {
+      cat(co, "Move \n")
+    } else if (event$type == 'key_press') {
+      cat(co, "Key: ", event$str, "\n")
+    }
+  }
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(verbose, fps_target = 10, show_fps = TRUE)
+```
+
+
+
+## Verbose Reference Example - R6
+
+It is not always wide to put lots of information in the global environment, 
+so another way of storing information is to use an environment.
+
+`{R6}` objects are a user-friendly environment-based way of storing functions 
+and values.  In the following example, an R6 method is used as the
+user callback function to the eventloop.
+
+
+```{r setup, eval = FALSE}
+library(R6)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# R6 environment object
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Agent <- R6::R6Class(
+  "Agent",
+  
+  public = list(
+    
+    last_x = NULL,
+    last_y = NULL,
+    
+    initialize = function() {
+      self$last_x <- NA
+      self$last_y <- NA
+      invisible(self)
+    },
+    
+    update = function(event, mouse_x, mouse_y, frame_num, fps_actual,
+                      fps_target, dev_width, dev_height, ...) {
+      
+      # Did an event happen at all in this window?
+      if (!is.null(event)) {
+        
+        # Draw a line
+        if (!is.na(self$last_x)) {
+          grid::grid.lines(
+            x = c(self$last_x, mouse_x),
+            y = c(self$last_y, mouse_y)
+          )
+        }
+        
+        # Keep track of latest mouse position
+        self$last_x <- mouse_x
+        self$last_y <- mouse_y
+        
+        # "Handle" the event by printing to console
+    co <- sprintf("Screen [%i, %i] Mouse Loc: [%.2f, %.2f]", dev_width, dev_height, mouse_x, mouse_y)
+        if (event$type %in% c('mouse_down', 'mouse_up')) {
+          cat(co, "Mouse: ", event$type, " - button: [", event$button, "]\n")
+        } else if (event$type == 'mouse_move') {
+          cat(co, "Move \n")
+        } else if (event$type == 'key_press') {
+          cat(co, "Key: ", event$str, "\n")
+        }
+      }
+    }
+  )
+)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create the 'Agent' object and start the event loop. Press ESC to quit.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+agent <- Agent$new()
+eventloop::run_loop(agent$update, fps_target = 10, show_fps = TRUE)

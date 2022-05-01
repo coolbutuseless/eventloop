@@ -1,0 +1,122 @@
+---
+title: "Realtime Plot Updates"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Realtime Plot Updates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Realtime stream-based plotting
+
+Plot new lines at every timestep as if drawing data from a sensor (or other
+data stream).
+
+
+## Controls
+
+* The behaviour of this callback function is not influenced by anything the
+  user does.
+* Press ESC to quit
+
+
+```{r eval = FALSE}
+library(grid)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Initialise a number of data streams
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N        <- 20
+Nstreams <- 100
+streams  <- lapply(seq(Nstreams), function(x) rep(0.5, N))
+alpha    <- 0.05
+cols     <- rainbow(Nstreams)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' The plotting/behaviour at each call doesn't actually depend on anything
+#' the user is doing, so all arguments are ignored
+#'
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$str` String describing which key was pressed. 
+#'                  See \code{grDevices::setGraphicsEventHandlers} for more information.
+#' @param mouse_x,mouse_y current location of mouse within window in normalised 
+#'        coordinates in the range [0, 1]. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num Current frame number (integer)
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+monitor_status <- function(...) {
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Update all streams by pulling a new value from the source.
+  # In this simple example, the datasource is just 'runif(1)'
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  streams <<- lapply(
+    streams,
+    function(stream) {
+      c(
+        stream[2:N],
+        alpha * runif(1) + (1 - alpha) * stream[N]
+      )
+    }
+  )
+
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Clear the screen
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  grid.rect(gp = gpar(fill = 'white'))
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Plot the data streams in different colours
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  for (i in seq_along(streams)) {
+    grid.lines(
+      x = seq.int(0, 1, length.out = N),
+      y = streams[[i]],
+      gp = gpar(col = cols[[i]])
+    )
+  }
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+run_loop(monitor_status, show_fps = TRUE, fps_target = 30)
+```
+
+
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
+<video controls>
+  <source src="images/plotting.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+
+

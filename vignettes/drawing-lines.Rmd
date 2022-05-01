@@ -1,0 +1,120 @@
+---
+title: "Drawing with Lines"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Drawing with Lines}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## A pixel-based drawing canvas
+
+Draw lines as the mouse moves.
+
+Extra logic is used to store prior coordinates so 
+  that the output is a continuous line when drawing
+
+
+## Controls
+
+* Press and hold the left mouse button to draw
+* Press SPACE to clear the canvas
+* Press ESC to quit
+
+
+```{r setup, eval=FALSE}
+library(grid)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set up the global variables which store the state of the world
+#  'drawing'  Currently drawing?
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+drawing <- FALSE
+last_x  <- NA
+last_y  <- NA
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' The main 'draw' function called within the eventloop
+#'
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$str` String describing which key was pressed. 
+#'                  See \code{grDevices::setGraphicsEventHandlers} for more information.
+#' @param mouse_x,mouse_y current location of mouse within window in normalised 
+#'        coordinates in the range [0, 1]. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num Current frame number (integer)
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw <- function(event, mouse_x, mouse_y, ...) {
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Process events
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (!is.null(event)) {
+    if (event$type == 'mouse_down') {
+      drawing <<- TRUE
+    } else if (event$type == 'mouse_up') {
+      drawing <<- FALSE
+      last_x <<- NA
+      last_y <<- NA
+    } else if (event$type == 'key_press' && event$str == ' ') {
+      grid::grid.rect(gp = gpar(col=NA, fill='white')) # clear screen
+      last_x <<- NA
+      last_y <<- NA
+    }
+  }
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # If drawing mode is active, draw from the last point to this point.
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if (drawing) {
+    if (!is.na(last_x)){
+      grid::grid.lines(
+        x = c(last_x, mouse_x),
+        y = c(last_y, mouse_y)
+      )
+    }
+    
+    last_x <<- mouse_x
+    last_y <<- mouse_y
+  }
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(draw, fps_target = NA, double_buffer = FALSE)
+```
+
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
+<video controls>
+  <source src="images/basic-canvas-smooth.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+

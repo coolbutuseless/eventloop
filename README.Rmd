@@ -39,20 +39,28 @@ and handling mouse+keyboard events from the user at speeds fast enough to be
 considered interesting for games and other realtime applications.
 
 
-The `{eventloop}` package takes care of setting up an `x11()` window  with 
-monitoring for keyboard+mouse events.  In every spare moment, a 
-user-defined function will be called with the latest event details.   Within
-this function the user can process events and update the display.
+`{eventloop}` is a wrapper around the built-in event handling available in 
+base R as part of `{grDevices}`, but presents it in a more palatable format 
+with some enhanced features.
 
-# ToDo before release
 
-* tidy 'unruly' vignette
-* tidy imports in DESCRIPTION - remove beepr and ggplot to reduce the 
-  dependency load
-* Make this small enough for cran
-    * PNG crush all images
-    * Hide some vignettes from CRAN/GITHUB and save for pkgdown site only.
-    * Replace some mp4s with just PNGs, and link to mp4s on documentation site.
+The `{eventloop}` package will:
+
+* Initiate an `x11()` window with monitoring for keyboard & mouse events.  
+* Capture events as they happen such that they will be available to the user-supplied function.
+* Coordinate the setup of the user-defined callback function to be run 
+  continually with access to the latest event information presented as the 
+  function arguments.
+* Optionally limit the frequency of screen updates by maintaining a frame-rate
+  specified by the user.
+  
+
+At each call, the user's function processes events and updates the display.
+
+## What's in the box
+
+* `run_loop()` takes a user-specified function and calls it continuously 
+  within an event-driven loop.
 
 ## Supported Platforms
 
@@ -65,7 +73,7 @@ dplyr::tibble(
   knitr::kable()
 ```
 
-Notes:
+#### Notes:
 
 * windows `x11()` device does not support `onIdle` callback and hence this 
   package does not work on windows
@@ -138,11 +146,10 @@ last_y  <- NA
 #'               - mouse was moved 
 #'        `event$type = 'key_press'`  
 #'               - a key was pressed
-#'               - `event$char` holds the character as string
-#'               - `event$int` holds the integer representation
-#' @param mouse_x,mouse_y current location of mouse within window. If mouse is 
+#'               - `event$str` String describing which key was pressed. See \code{grDevices::setGraphicsEventHandlers} for more information.
+#' @param mouse_x,mouse_y current location of mouse within window in normalised coordinates in the range [0, 1]. If mouse is 
 #'        not within window, this will be set to the last available coordinates
-#' @param frame_num integer count of which frame this is
+#' @param frame_num Current frame number (integer)
 #' @param fps_actual,fps_target the curent framerate and the framerate specified
 #'        by the user
 #' @param dev_width,dev_height the width and height of the output device. Note:
@@ -161,7 +168,7 @@ draw <- function(event, mouse_x, mouse_y, ...) {
       drawing <<- FALSE
       last_x  <<- NA
       last_y  <<- NA
-    } else if (event$type == 'key_press' && event$char == ' ') {
+    } else if (event$type == 'key_press' && event$str == ' ') {
       grid::grid.rect(gp = gpar(col=NA, fill='white')) # clear screen
     }
   }
@@ -213,14 +220,33 @@ All examples are written in plain R using the `{eventloop}` package.
 
 |   |   |
 |---|---|
-| [Grid-based drawing <br/><img src="man/figures/gallery/grid-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-grid.html)   | [Point-based drawing <br/><img src="man/figures/gallery/point-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-rough.html)   |
-| [Line-based drawing <br/><img src="man/figures/gallery/line-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-basic-canvas-smooth.html)   | [Animated Starfield <br/><img src="man/figures/gallery/starfield.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-starfield.html) |
-| [Streaming plot data <br/><img src="man/figures/gallery/plot-stream.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ba-plotting.html) | [Game of Life <br/><img src="man/figures/gallery/game-of-life.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-game-of-life.html) |
-| [Reactive objects <br/><img src="man/figures/gallery/reactive-small.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-reactive-objects.html) | [Kaleidoscope <br/><img src="man/figures/gallery/spirograph.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/ca-spirograph.html) |
-| [Asteroids<br/><img src="man/figures/gallery/asteroids.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/3da-asteroids.html) | [Physics Simulation <br/><img src="man/figures/gallery/physics.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-physics-sim.html) |
-| [Raycast 'Wolfenstein' 3d engine <br/><img src="man/figures/gallery/raycast.png" width="89%"  />](https://coolbutuseless.github.io/package/eventloop/articles/da-raycaster.html) | ['Unruly' Puzzle <br/><img src="man/figures/gallery/unruly.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-unruly.html) |
-| [Wordle <br/><img src="man/figures/gallery/wordle.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/da-wordle.html) |  |
-| [Verbose debugging example <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-global.html) | [Verbose debugging example with R6 <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/aa-event-reference-r6.html) |
+| [Grid-based drawing <br/><img src="man/figures/gallery/grid-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/drawing-grid.html)   | [Line-based drawing <br/><img src="man/figures/gallery/line-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/drawing-lines.html)   | 
+| [Streaming plot data <br/><img src="man/figures/gallery/plot-stream.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/stream-plotting.html) | [Game of Life <br/><img src="man/figures/gallery/game-of-life.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/game-of-life.html) |
+| [Asteroids<br/><img src="man/figures/gallery/asteroids.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/game-asteroids.html) |  [Raycast 'Wolfenstein' 3d engine <br/><img src="man/figures/gallery/raycast.png" width="89%"  />](https://coolbutuseless.github.io/package/eventloop/articles/game-raycaster.html) |  
+| [Wordle <br/><img src="man/figures/gallery/wordle.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/game-wordle.html) | [Verbose example <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/verbose-example.html) | 
+
+
+## FAQ
+
+#### Why is Windows not supported?
+
+No graphics device on windows supports the `onIdle` callback, which is essential
+to the workings of this package.
+
+The Windows operating system supports the concept of an `onIdle` callback, but 
+no one has yet written this into the R graphics device on this platform.
+
+#### Why does this run so slow on macOS sometimes?
+
+Through some unknown combination of factors, after running `x11()` windows
+on macOS for some number of times or duration, the system will slowdown from hundreds-of-frames-per-second
+to just ten-frames-per-second.
+
+This feels like a bug in either the `XQuartz()` x11 framework, or it could be 
+a bug within R in how it interfaces with `XQuartz()`
+
+Note that I have not seen any slowdowns when using `x11()` devices on Linux machines.
+
 
 
 ## Tech bits: What is an event loop?
