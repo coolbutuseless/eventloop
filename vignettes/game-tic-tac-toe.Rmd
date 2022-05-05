@@ -186,7 +186,7 @@ tictactoe <- function(event, mouse_x, mouse_y, frame_num, fps_actual,
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Start the event loop. Press ESC to quit.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-eventloop::run_loop(tictactoe, fps_target = 10, show_fps = TRUE)
+eventloop::run_loop(tictactoe, fps_target = 10, show_fps = TRUE, double_buffer = FALSE)
 ```
 
 

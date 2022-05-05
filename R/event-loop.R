@@ -289,6 +289,11 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'          \item{\code{...}}{ - Catch any other arguments.  Note that this is
 #'                a required argument in all \code{user_func} callback functions}
 #'        }
+#' @param init_func user-supplied function to be run once when the window is first initialised.
+#'        e.g. The following init function could be used to set the initial background colour
+#'        \code{init_func = function() {grid.rect(gp = gpar(fill='blue'))}}.
+#'        Default: NULL means no initialisation function is run.  The supplied
+#'        function should take no arguments.
 #' @param width,height size of graphics device to open in inches. Default: 7x7 inches
 #' @param fps_target target frames-per-second.  If rendering speed surpasses
 #'        this then slight pauses will be added to each loop to bring this
@@ -323,7 +328,8 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps = FALSE,
+run_loop <- function(user_func, init_func = NULL, width = 7, height = 7,
+                     fps_target = 30, show_fps = FALSE,
                      double_buffer = TRUE, verbose = FALSE) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -420,7 +426,10 @@ run_loop <- function(user_func, width = 7, height = 7, fps_target = 30, show_fps
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  cat('Starting Event Loop. Press ESC in window to quit.')
+  cat('Starting Event Loop. Press ESC in window to quit. ')
+  if (is.function(init_func)) {
+    init_func()
+  }
   grDevices::getGraphicsEvent()
 
   invisible(NULL)

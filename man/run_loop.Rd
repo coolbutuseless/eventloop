@@ -6,6 +6,7 @@
 \usage{
 run_loop(
   user_func,
+  init_func = NULL,
   width = 7,
   height = 7,
   fps_target = 30,
@@ -54,6 +55,12 @@ run_loop(
          \item{\code{...}}{ - Catch any other arguments.  Note that this is
                a required argument in all \code{user_func} callback functions}
        }}
+
+\item{init_func}{user-supplied function to be run once when the window is first initialised.
+e.g. The following init function could be used to set the initial background colour
+\code{init_func = function() {grid.rect(gp = gpar(fill='blue'))}}.
+Default: NULL means no initialisation function is run.  The supplied
+function should take no arguments.}
 
 \item{width, height}{size of graphics device to open in inches. Default: 7x7 inches}
 

@@ -143,7 +143,6 @@ draw_board <- function(guesses, target, current_wordnum) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global state for the eventloop
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-init    <- FALSE    # Has the puzzle been started?
 solved  <- FALSE    # Has the puzzle been solved?
 failed  <- FALSE    # Has the user completely failed to guess?
 guesses <- c('')    # The guesses from the user
@@ -183,14 +182,6 @@ wordnum <- 1   # which attempt?
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 wordle <- function(event, ...) {
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # If this is  first frame then the board *MUST* be drawn
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-  if (!init) {
-    init <<- TRUE
-    draw_board(guesses, target, wordnum)
-  }
-  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
   # Build the current word a letter at a time
   # When the current word is 5 letters long, then add it to the list of guesses
@@ -233,10 +224,15 @@ wordle <- function(event, ...) {
 }
 
 
+init_board <- function() {
+  draw_board(guesses, target, wordnum)
+}
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Start the event loop. Press ESC to quit
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-eventloop::run_loop(wordle, double_buffer = FALSE)
+eventloop::run_loop(wordle, init_func = init_board, double_buffer = FALSE)
 ```
 
 

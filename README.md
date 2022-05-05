@@ -253,14 +253,6 @@ function over and over while the event loop is running.
 
 <img src="man/figures/event-handlers.png" />
 
-## Related Software
-
--   tcl/tk
--   other GUI toolkits
--   rpanel
--   shiny
--   documentation for `grid.locate()`
-
 ## Acknowledgements
 
 -   R Core for developing and maintaining the language.
