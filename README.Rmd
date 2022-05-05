@@ -223,8 +223,8 @@ All examples are written in plain R using the `{eventloop}` package.
 | [Grid-based drawing <br/><img src="man/figures/gallery/grid-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/drawing-grid.html)   | [Line-based drawing <br/><img src="man/figures/gallery/line-based.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/drawing-lines.html)   | 
 | [Streaming plot data <br/><img src="man/figures/gallery/plot-stream.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/stream-plotting.html) | [Game of Life <br/><img src="man/figures/gallery/game-of-life.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/game-of-life.html) |
 | [Asteroids<br/><img src="man/figures/gallery/asteroids.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/game-asteroids.html) |  [Raycast 'Wolfenstein' 3d engine <br/><img src="man/figures/gallery/raycast.png" width="89%"  />](https://coolbutuseless.github.io/package/eventloop/articles/game-raycaster.html) |  
-| [Wordle <br/><img src="man/figures/gallery/wordle.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/game-wordle.html) | [Verbose example <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/verbose-example.html) | 
-
+| [Wordle <br/><img src="man/figures/gallery/wordle.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/game-wordle.html) | [Interactive Mystery Curves <br/><img src="man/figures/gallery/mystery-curves.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/verbose-example.html) | 
+|  | [Verbose example <br/><img src="man/figures/gallery/debug.png" width="89%" />](https://coolbutuseless.github.io/package/eventloop/articles/verbose-example.html) | 
 
 ## FAQ
 

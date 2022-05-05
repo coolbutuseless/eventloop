@@ -1,0 +1,103 @@
+---
+title: "Mystery Curves"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mystery Curves}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Interactive plotting of mystery curves
+
+George Savva outlined a great creative coding technique he uses in his [post on Mystery Curves](https://georgemsavva.github.io/creativecoding/posts/mystery/).
+
+These curves are the superposition of multiple circular paths and render as pleasing 
+spiral/repeating patterns.
+
+In this example the mouse X and Y position are used to control two key 
+parameters in the rendering - making this an interactive exploration of the parameter space.
+
+
+## Controls
+
+* Mouse position is used to control two key curve parameters
+* Press ESC to quit
+
+
+```{r setup, eval=FALSE}
+library(grid)
+library(eventloop)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' The main 'draw' function called within the eventloop
+#'
+#' @param event The event from the graphics device. Is NULL when no event
+#'        occurred.  Otherwise has `type` element set to:
+#'        `event$type = 'mouse_down'` 
+#'               - an event in which a mouse button was pressed
+#'               - `event$button` gives the index of the button
+#'        `event$type = 'mouse_up'`   
+#'               - a mouse button was released
+#'        `event$type = 'mouse_move'`   
+#'               - mouse was moved 
+#'        `event$type = 'key_press'`  
+#'               - a key was pressed
+#'               - `event$str` String describing which key was pressed. 
+#'                  See \code{grDevices::setGraphicsEventHandlers} for more information.
+#' @param mouse_x,mouse_y current location of mouse within window in normalised 
+#'        coordinates in the range [0, 1]. If mouse is 
+#'        not within window, this will be set to the last available coordinates
+#' @param frame_num Current frame number (integer)
+#' @param fps_actual,fps_target the curent framerate and the framerate specified
+#'        by the user
+#' @param dev_width,dev_height the width and height of the output device. Note:
+#'        this does not cope well if you resize the window
+#' @param ... any extra arguments ignored
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+circle <- function(amp, freq, phase) amp*1i^(freq*seq(0,600,l=260)+phase)
+
+draw <- function(event, mouse_x, mouse_y, ...) {
+  
+  grid.rect(gp = gpar(fill = '#04010F'))
+
+  a <- mouse_x * 5;
+  l <- sin(pi*(2*a-.5))+1
+
+  z <-circle(mouse_y, 1, 0) +
+    circle(l, ceiling(a), -8*a) +
+    circle(l/2-1,ceiling(((-a+2.5)%%5)-5), -4*a)
+
+  x <- Re(z)/7 + 0.5
+  y <- Im(z)/7 + 0.5
+
+  hue <- (a+(Re(z/10))) %% 1
+  col <- hsv(hue, 0.65, 1, .1)
+
+  grid.points(x, y, gp = gpar(col = col), pch = 20, default.units = 'npc')
+
+  grid.segments(x, y, c(x[-1], x[1]), c(y[-1], y[1]), gp = gpar(col = col, lwd = 2))
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Start the event loop. Press ESC to quit
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+eventloop::run_loop(draw, fps_target = 20, double_buffer = TRUE, show_fps = TRUE)
+```
+
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
+<video controls>
+  <source src="images/mystery-curves.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+

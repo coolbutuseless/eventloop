@@ -14,4 +14,4 @@ articles:
 
 - title: Plotting
   navbar: Plotting
-  contents: [stream-plotting]
+  contents: [stream-plotting, art-mystery-curves]
