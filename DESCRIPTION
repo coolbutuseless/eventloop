@@ -1,7 +1,7 @@
 Package: eventloop
 Type: Package
 Title: Event Loop for Interactive Realtime Rendering
-Version: 0.1.0
+Version: 0.1.1
 Author: mikefc
 Authors@R: c(
     person("Mike", "FC", email = "mikefc@coolbutuseless.com", role = c("aut", "cre", "cph"))

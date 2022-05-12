@@ -194,7 +194,8 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
       fps_actual = fps_actual,
       fps_target = fps_target,
       dev_width  = width,
-      dev_height = height
+      dev_height = height,
+      event_env  = event_env
     )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,7 +238,22 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     event_env$event <- NULL
 
-    NULL
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Adjust FPS if requested by the user
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (!is.null(event_env$fps_target)) {
+      fps_target <<- event_env$fps_target
+      if (fps_target < 1) {
+        fps_target <<- 1
+      }
+      event_env$fps_target <- NULL
+    }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # User should set 'event_env$close' to a non-NULL value to terminate
+    # the session. Otheriwse press ESC
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    event_env$close
   }
 
 }
@@ -286,6 +302,10 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'        by the user}
 #'          \item{\code{dev_width, dev_height}}{ - the width and height of the output device
 #'          in pixels. Note: this does not cope with window resizing}
+#'          \item{\code{event_env}}{ - Experts only! An environment object through which the user can return
+#'          values to the framework.  Currently supports setting \code{event_env$close} to a non-NULL
+#'          value to terminate the program.  Set \code{event_env$fps_target} to change the
+#'          FPS of the running app.}
 #'          \item{\code{...}}{ - Catch any other arguments.  Note that this is
 #'                a required argument in all \code{user_func} callback functions}
 #'        }

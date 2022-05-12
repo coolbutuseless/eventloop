@@ -52,6 +52,10 @@ run_loop(
        by the user}
          \item{\code{dev_width, dev_height}}{ - the width and height of the output device
          in pixels. Note: this does not cope with window resizing}
+         \item{\code{event_env}}{ - Experts only! An environment object through which the user can return
+         values to the framework.  Currently supports setting \code{event_env$close} to a non-NULL
+         value to terminate the program.  Set \code{event_env$fps_target} to change the
+         FPS of the running app.}
          \item{\code{...}}{ - Catch any other arguments.  Note that this is
                a required argument in all \code{user_func} callback functions}
        }}
