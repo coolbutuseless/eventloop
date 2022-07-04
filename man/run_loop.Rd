@@ -99,9 +99,11 @@ that the user-supplied callback function is run with appropriate
 parameters at the specified rate.
 }
 \examples{
+\dontrun{
 if (interactive()) {
   my_fun <- function(...) { cat(".") }
   run_loop(my_fun)
+}
 }
 
 }

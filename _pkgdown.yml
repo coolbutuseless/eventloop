@@ -8,6 +8,10 @@ articles:
   navbar: Drawing
   contents: [drawing-grid, drawing-lines]
 
+- title: Demo
+  navbar: Demo
+  contents: [demo-particles]
+
 - title: Games
   navbar: Games
   contents: [game-asteroids, game-of-life, game-raycaster, game-tic-tac-toe, game-wordle]

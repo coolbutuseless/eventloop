@@ -1,0 +1,95 @@
+---
+title: "Particles"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Particles}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+This example shows the simulated movement of particles.  This is not really
+anything physics-based or reality-based, but looks a little bit organic - like
+single celled creatures roaming around.
+
+There is no interactivity in this example - but could be interesting to add e.g.
+adjust velocity vectors away from the current mouse position to make it look 
+like the particles are avoiding it.
+
+
+```{r setup}
+library(grid)
+library(eventloop)
+```
+
+
+
+```{r eval=FALSE}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Particle parameters
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N <- 100
+x  <- runif(N)
+y  <- runif(N)
+vx <- runif(N, -0.5, 0.5) / 160
+vy <- runif(N, -0.5, 0.5) / 160
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Update factor
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+k <- 0.01
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Main event callback
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+update_particles <- function(...) {
+  
+  # Mean velocity of a random half of the population
+  mean_vx <- mean(sample(vx, N/2))
+  mean_vy <- mean(sample(vy, N/2))
+  
+  # Update the velocity towards the mean + noise
+  vx <<- (1 - k) * vx + k * mean_vx + runif(N, -0.5, 0.5) / 400
+  vy <<- (1 - k) * vy + k * mean_vy + runif(N, -0.5, 0.5) / 400
+  
+  # Update position
+  x <<- x + vx
+  y <<- y + vy
+  
+  # Wrap around coordinates
+  x[x < 0] <<- 1
+  x[x > 1] <<- 0
+  y[y < 0] <<- 1
+  y[y > 1] <<- 0
+  
+  # Overlay a white rect with alpha to get a particle trail effect
+  grid.rect(gp = gpar(fill = '#ffffff80'))
+  grid.points(x, y, default.units = 'npc', gp = gpar(fill = 'grey80'), pch = 21)
+}
+
+
+eventloop::run_loop(update_particles, show_fps = TRUE, width = 10, height =7)
+```
+
+
+
+
+Since an interactive window cannot be captured in a vignette, a video
+screen capture has been taken of the window and included below.
+
+<video controls>
+  <source src="images/particles.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video> 
+
+

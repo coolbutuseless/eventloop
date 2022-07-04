@@ -337,9 +337,11 @@ gen_onIdle <- function(user_func, fps_target = 30, show_fps = FALSE, this_dev,
 #'         condition occurs e.g. an error
 #'
 #' @examples
+#' \dontrun{
 #' if (interactive()) {
 #'   my_fun <- function(...) { cat(".") }
 #'   run_loop(my_fun)
+#' }
 #' }
 #'
 #' @importFrom methods formalArgs
