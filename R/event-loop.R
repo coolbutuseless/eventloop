@@ -357,7 +357,7 @@ run_loop <- function(user_func, init_func = NULL, width = 7, height = 7,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Sanity Check: Operating System
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if (.Platform$OS.type == 'windows') {
+  if (.Platform$OS.type == 'windows' && getRversion() < '4.7.0') {
     stop("The 'eventloop' package is not compatible with windows because the ",
          "graphics devices do not support the required interaction events")
   }
@@ -393,7 +393,11 @@ run_loop <- function(user_func, init_func = NULL, width = 7, height = 7,
   # Create a device and capture its device number.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   devs1 <- dev.list()
-  grDevices::x11(type = type, width = width, height = height)
+  if (.Platform$OS.type == 'windows') {
+    grDevices::windows(buffered = double_buffer, width = width, height = height)
+  } else {
+    grDevices::x11(type = type, width = width, height = height)
+  }
   devs2 <- dev.list()
   this_dev <- setdiff(devs2, devs1)
   on.exit(grDevices::dev.off(which = this_dev))
